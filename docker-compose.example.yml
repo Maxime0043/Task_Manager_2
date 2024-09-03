@@ -5,11 +5,11 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: database
     ports:
       - "3306:3306"
     volumes:
       - task-manager-mysql-data:/var/lib/mysql
+      - ./docker/provision/mysql/init:/docker-entrypoint-initdb.d
     networks:
       - task-manager-network
 
