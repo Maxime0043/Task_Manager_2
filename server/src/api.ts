@@ -3,10 +3,13 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import helmet from "helmet";
 import cors from "cors";
 
 const app = express();
 
+// Define Helmet
+app.use(helmet());
 // Define CORS
 app.use(
   cors({
