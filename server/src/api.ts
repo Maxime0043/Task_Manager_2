@@ -27,4 +27,4 @@ const routes = require("./routes");
 app.use("/api/v1", routes);
 
 // Export the express app
-module.exports = app;
+export default app;
