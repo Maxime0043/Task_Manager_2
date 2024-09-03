@@ -1,10 +1,13 @@
 services:
-  #mongodb
+  #mysql
 
   #server
 
   #client
 
 volumes:
+  task-manager-mysql-data:
 
 networks:
+  task-manager-network:
+    driver: bridge
