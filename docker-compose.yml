@@ -1,5 +1,17 @@
 services:
-  #mysql
+  mysql:
+    image: mysql:9.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: database
+    ports:
+      - "3306:3306"
+    volumes:
+      - task-manager-mysql-data:/var/lib/mysql
+    networks:
+      - task-manager-network
 
   #server
 
