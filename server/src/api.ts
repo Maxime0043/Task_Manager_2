@@ -19,7 +19,9 @@ app.use(
 app.use(express.json());
 
 // Define the API routes
-// ...
+const routes = require("./routes");
+
+app.use("/api/v1", routes);
 
 // Export the express app
 module.exports = app;
