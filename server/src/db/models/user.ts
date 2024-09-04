@@ -19,7 +19,7 @@ class User extends Model {
     type: DataType.UUID,
     defaultValue: DataType.UUIDV4,
     primaryKey: true,
-    autoIncrement: true,
+    allowNull: false,
   })
   id!: string;
 
