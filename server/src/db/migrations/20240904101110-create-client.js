@@ -25,7 +25,7 @@ module.exports = {
         },
         type: Sequelize.STRING,
       },
-      comment: {
+      description: {
         type: Sequelize.STRING,
       },
       createdBy: {
