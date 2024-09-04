@@ -19,11 +19,13 @@ const sequelize = new Sequelize(
 // Import all the models
 import UserRoles from "./user_role";
 import User from "./user";
+import Client from "./client";
 
-sequelize.addModels([UserRoles, User]);
+sequelize.addModels([UserRoles, User, Client]);
 
 db.UserRoles = UserRoles;
 db.User = User;
+db.Client = Client;
 
 // Export the sequelize instance
 db.sequelize = sequelize;
