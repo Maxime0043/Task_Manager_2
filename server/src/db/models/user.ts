@@ -5,6 +5,7 @@ import {
   DataType,
   IsEmail,
   ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
 
 import UserRoles from "./user_role";
@@ -52,7 +53,8 @@ class User extends Model {
    * ASSOCIATIONS
    */
 
-  // Add associations here
+  @BelongsTo(() => UserRoles)
+  userRole!: UserRoles;
 }
 
 export default User;

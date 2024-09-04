@@ -1,4 +1,6 @@
-import { Table, Column, Model, DataType, IsEmail } from "sequelize-typescript";
+import { Table, Column, Model, DataType, HasMany } from "sequelize-typescript";
+
+import User from "./user";
 
 @Table({
   modelName: "UserRoles",
@@ -22,7 +24,8 @@ class UserRoles extends Model {
    * ASSOCIATIONS
    */
 
-  // Add associations here
+  @HasMany(() => User)
+  users!: User[];
 }
 
 export default UserRoles;
