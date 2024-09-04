@@ -6,9 +6,11 @@ import {
   IsEmail,
   ForeignKey,
   BelongsTo,
+  HasMany,
 } from "sequelize-typescript";
 
 import UserRoles from "./user_role";
+import Client from "./client";
 
 @Table({
   modelName: "User",
@@ -55,6 +57,9 @@ class User extends Model {
 
   @BelongsTo(() => UserRoles)
   userRole!: UserRoles;
+
+  @HasMany(() => Client)
+  clientsCreated!: Client[];
 }
 
 export default User;

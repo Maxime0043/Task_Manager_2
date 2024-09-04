@@ -6,6 +6,7 @@ import {
   IsEmail,
   Is,
   ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
 
 import User from "./user";
@@ -45,7 +46,8 @@ class Client extends Model {
    * ASSOCIATIONS
    */
 
-  // Add associations here
+  @BelongsTo(() => User)
+  creator!: User;
 }
 
 export default Client;
