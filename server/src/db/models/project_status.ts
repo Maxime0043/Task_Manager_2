@@ -1,7 +1,17 @@
-import { Table, Column, Model, DataType, Is } from "sequelize-typescript";
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  Is,
+  HasMany,
+} from "sequelize-typescript";
+
+import Project from "./project";
 
 @Table({
   modelName: "ProjectStatus",
+  tableName: "ProjectStatus",
 })
 class ProjectStatus extends Model {
   @Column({
@@ -25,8 +35,6 @@ class ProjectStatus extends Model {
   /**
    * ASSOCIATIONS
    */
-
-  // Add the associations here
 }
 
 export default ProjectStatus;

@@ -7,9 +7,11 @@ import {
   Is,
   ForeignKey,
   BelongsTo,
+  HasMany,
 } from "sequelize-typescript";
 
 import User from "./user";
+import Project from "./project";
 
 @Table({
   modelName: "Client",
@@ -40,7 +42,7 @@ class Client extends Model {
 
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID, allowNull: false })
-  createdBy!: string;
+  creatorId!: string;
 
   /**
    * ASSOCIATIONS

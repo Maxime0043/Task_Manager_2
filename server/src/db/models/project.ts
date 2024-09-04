@@ -4,6 +4,7 @@ import {
   Model,
   DataType,
   ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
 
 import User from "./user";
@@ -28,7 +29,7 @@ class Project extends Model {
 
   @ForeignKey(() => ProjectStatus)
   @Column({ type: DataType.INTEGER, allowNull: false })
-  status!: number;
+  statusId!: number;
 
   @Column({ type: DataType.DECIMAL(12, 2), allowNull: false })
   budget!: number;
@@ -49,13 +50,11 @@ class Project extends Model {
 
   @ForeignKey(() => User)
   @Column({ type: DataType.UUID, allowNull: false })
-  createdBy!: string;
+  creatorId!: string;
 
   /**
    * ASSOCIATIONS
    */
-
-  // Add the associations here
 }
 
 export default Project;

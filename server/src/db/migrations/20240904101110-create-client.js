@@ -28,7 +28,7 @@ module.exports = {
       description: {
         type: Sequelize.STRING,
       },
-      createdBy: {
+      creatorId: {
         references: {
           model: "Users",
           key: "id",

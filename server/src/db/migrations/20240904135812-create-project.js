@@ -13,7 +13,7 @@ module.exports = {
         allowNull: false,
         type: Sequelize.STRING,
       },
-      status: {
+      statusId: {
         allowNull: false,
         references: {
           model: "ProjectStatus",
@@ -50,7 +50,7 @@ module.exports = {
         },
         type: Sequelize.UUID,
       },
-      createdBy: {
+      creatorId: {
         allowNull: false,
         references: {
           model: "Users",

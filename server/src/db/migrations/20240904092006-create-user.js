@@ -30,7 +30,7 @@ module.exports = {
         allowNull: true,
         type: Sequelize.STRING,
       },
-      role: {
+      roleId: {
         allowNull: true,
         references: {
           model: "UserRoles",

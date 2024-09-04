@@ -11,6 +11,7 @@ import {
 
 import UserRoles from "./user_role";
 import Client from "./client";
+import Project from "./project";
 
 @Table({
   modelName: "User",
@@ -46,7 +47,7 @@ class User extends Model {
     type: DataType.INTEGER,
     allowNull: true,
   })
-  role!: string;
+  roleId!: string;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
   isAdmin!: string;
