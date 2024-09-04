@@ -50,6 +50,9 @@ class Client extends Model {
 
   @BelongsTo(() => User)
   creator!: User;
+
+  @HasMany(() => Project)
+  projects!: Project[];
 }
 
 export default Client;

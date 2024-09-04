@@ -61,6 +61,12 @@ class User extends Model {
 
   @HasMany(() => Client)
   clientsCreated!: Client[];
+
+  @HasMany(() => Project, "managerId")
+  projectsManaged!: Project[];
+
+  @HasMany(() => Project, "creatorId")
+  projectsCreated!: Project[];
 }
 
 export default User;

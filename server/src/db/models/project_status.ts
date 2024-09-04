@@ -35,6 +35,9 @@ class ProjectStatus extends Model {
   /**
    * ASSOCIATIONS
    */
+
+  @HasMany(() => Project)
+  projects!: Project[];
 }
 
 export default ProjectStatus;

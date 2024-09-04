@@ -55,6 +55,18 @@ class Project extends Model {
   /**
    * ASSOCIATIONS
    */
+
+  @BelongsTo(() => ProjectStatus)
+  projectStatus!: ProjectStatus;
+
+  @BelongsTo(() => User, "managerId")
+  manager!: User;
+
+  @BelongsTo(() => Client)
+  client!: Client;
+
+  @BelongsTo(() => User, "creatorId")
+  creator!: User;
 }
 
 export default Project;
