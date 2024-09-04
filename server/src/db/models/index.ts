@@ -3,13 +3,13 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const configs = require(__dirname + "/../config/config.js");
-import { Sequelize, DataTypes } from "sequelize";
+import { Sequelize } from "sequelize-typescript";
 
 const env = process.env.ENV_TYPE || "development";
 const config = configs[env];
 const db: any = {};
 
-let sequelize = new Sequelize(
+const sequelize = new Sequelize(
   config.database,
   config.username,
   config.password,
@@ -17,14 +17,16 @@ let sequelize = new Sequelize(
 );
 
 // Import all the models
-// ...
 
-Object.keys(db).forEach((modelName) => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
-});
+/**
+ * Example:
+ *
+ * import User from "./user";
+ * sequelize.addModels([User]);
+ * db.User = User;
+ */
 
+// Export the sequelize instance
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
