@@ -22,14 +22,23 @@ import User from "./user";
 import Client from "./client";
 import ProjectStatus from "./project_status";
 import Project from "./project";
+import TaskStatus from "./task_status";
 
-sequelize.addModels([UserRoles, User, Client, ProjectStatus, Project]);
+sequelize.addModels([
+  UserRoles,
+  User,
+  Client,
+  ProjectStatus,
+  Project,
+  TaskStatus,
+]);
 
 db.UserRoles = UserRoles;
 db.User = User;
 db.Client = Client;
 db.ProjectStatus = ProjectStatus;
 db.Project = Project;
+db.TaskStatus = TaskStatus;
 
 // Export the sequelize instance
 db.sequelize = sequelize;
