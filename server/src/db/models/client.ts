@@ -37,7 +37,7 @@ class Client extends Model {
   @Column({ type: DataType.STRING, allowNull: true })
   phone!: string;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({ type: DataType.TEXT, allowNull: true })
   description!: string;
 
   @ForeignKey(() => User)

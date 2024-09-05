@@ -37,7 +37,7 @@ class Project extends Model {
   @Column({ type: DataType.DECIMAL(12, 2), allowNull: false })
   budget!: number;
 
-  @Column({ type: DataType.STRING, allowNull: true })
+  @Column({ type: DataType.TEXT, allowNull: true })
   description!: string;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })

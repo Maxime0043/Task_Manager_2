@@ -26,7 +26,8 @@ module.exports = {
         type: Sequelize.STRING,
       },
       description: {
-        type: Sequelize.STRING,
+        allowNull: true,
+        type: Sequelize.TEXT,
       },
       creatorId: {
         references: {
