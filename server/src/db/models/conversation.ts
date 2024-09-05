@@ -1,7 +1,16 @@
-import { Table, Column, Model, DataType, HasOne } from "sequelize-typescript";
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  HasOne,
+  HasMany,
+} from "sequelize-typescript";
+
 import ConversationUsers from "./conversation_users";
 import ConversationProjects from "./conversation_projects";
 import ConversationTasks from "./conversation_tasks";
+import Message from "./message";
 
 export const CONVERSATION_TYPE = {
   USER: "user",
@@ -40,6 +49,9 @@ class Conversation extends Model {
 
   @HasOne(() => ConversationTasks)
   conversationTasks!: ConversationTasks;
+
+  @HasMany(() => Message)
+  messages!: Message[];
 }
 
 export default Conversation;

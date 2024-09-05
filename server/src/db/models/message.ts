@@ -4,6 +4,7 @@ import {
   Model,
   DataType,
   ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
 
 import User from "./user";
@@ -36,7 +37,11 @@ class Message extends Model {
    * ASSOCIATIONS
    */
 
-  // Add associations here
+  @BelongsTo(() => Conversation)
+  conversation!: Conversation;
+
+  @BelongsTo(() => User)
+  user!: User;
 }
 
 export default Message;
