@@ -25,6 +25,7 @@ import Project from "./project";
 import TaskStatus from "./task_status";
 import Task from "./task";
 import TaskUsers from "./task_users";
+import TaskFiles from "./task_files";
 
 sequelize.addModels([
   UserRoles,
@@ -35,6 +36,7 @@ sequelize.addModels([
   TaskStatus,
   Task,
   TaskUsers,
+  TaskFiles,
 ]);
 
 db.UserRoles = UserRoles;
@@ -45,6 +47,7 @@ db.Project = Project;
 db.TaskStatus = TaskStatus;
 db.Task = Task;
 db.TaskUsers = TaskUsers;
+db.TaskFiles = TaskFiles;
 
 // Export the sequelize instance
 db.sequelize = sequelize;
