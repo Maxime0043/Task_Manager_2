@@ -4,6 +4,7 @@ import {
   Model,
   DataType,
   ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
 
 import Message from "./message";
@@ -32,7 +33,8 @@ class MessageFiles extends Model {
    * ASSOCIATIONS
    */
 
-  // Add associations here
+  @BelongsTo(() => Message)
+  message!: Message;
 }
 
 export default MessageFiles;

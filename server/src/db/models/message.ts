@@ -5,10 +5,12 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  HasMany,
 } from "sequelize-typescript";
 
 import User from "./user";
 import Conversation from "./conversation";
+import MessageFiles from "./message_files";
 
 @Table({
   modelName: "Message",
@@ -42,6 +44,9 @@ class Message extends Model {
 
   @BelongsTo(() => User)
   user!: User;
+
+  @HasMany(() => MessageFiles)
+  files!: MessageFiles[];
 }
 
 export default Message;
