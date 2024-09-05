@@ -15,6 +15,7 @@ import Client from "./client";
 import Project from "./project";
 import Task from "./task";
 import TaskUsers from "./task_users";
+import TaskFiles from "./task_files";
 
 @Table({
   modelName: "User",
@@ -76,6 +77,9 @@ class User extends Model {
 
   @BelongsToMany(() => Task, () => TaskUsers, "userId", "taskId")
   tasksAssigned!: Task[];
+
+  @HasMany(() => TaskFiles)
+  filesAddedToTasks!: TaskFiles[];
 }
 
 export default User;
