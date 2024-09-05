@@ -4,6 +4,7 @@ import {
   Model,
   DataType,
   ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
 
 import Task from "./task";
@@ -34,7 +35,11 @@ class ConversationTasks extends Model {
    * ASSOCIATIONS
    */
 
-  // Add associations here
+  @BelongsTo(() => Conversation)
+  conversation!: Conversation;
+
+  @BelongsTo(() => Task)
+  task!: Task;
 }
 
 export default ConversationTasks;

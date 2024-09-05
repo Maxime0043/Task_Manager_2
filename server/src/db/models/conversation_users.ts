@@ -4,6 +4,7 @@ import {
   Model,
   DataType,
   ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
 
 import User from "./user";
@@ -41,7 +42,14 @@ class ConversationUsers extends Model {
    * ASSOCIATIONS
    */
 
-  // Add associations here
+  @BelongsTo(() => Conversation)
+  conversation!: Conversation;
+
+  @BelongsTo(() => User, "aUserId")
+  aUser!: User;
+
+  @BelongsTo(() => User, "bUserId")
+  bUser!: User;
 }
 
 export default ConversationUsers;
