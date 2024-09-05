@@ -12,6 +12,7 @@ import User from "./user";
 import Client from "./client";
 import ProjectStatus from "./project_status";
 import Task from "./task";
+import TaskScheduled from "./task_scheduled";
 
 @Table({
   modelName: "Project",
@@ -72,6 +73,9 @@ class Project extends Model {
 
   @HasMany(() => Task)
   tasks!: Task[];
+
+  @HasMany(() => TaskScheduled)
+  taskScheduled!: TaskScheduled[];
 }
 
 export default Project;

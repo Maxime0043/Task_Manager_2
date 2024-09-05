@@ -14,6 +14,7 @@ import Project from "./project";
 import TaskStatus from "./task_status";
 import TaskUsers from "./task_users";
 import TaskFiles from "./task_files";
+import TaskScheduled from "./task_scheduled";
 
 export const TASK_PRIORITIES = {
   HIGH: "high",
@@ -89,6 +90,9 @@ class Task extends Model {
 
   @HasMany(() => TaskFiles)
   files!: TaskFiles[];
+
+  @HasMany(() => TaskScheduled)
+  scheduled!: TaskScheduled[];
 }
 
 export default Task;

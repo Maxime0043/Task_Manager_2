@@ -16,6 +16,7 @@ import Project from "./project";
 import Task from "./task";
 import TaskUsers from "./task_users";
 import TaskFiles from "./task_files";
+import TaskScheduled from "./task_scheduled";
 
 @Table({
   modelName: "User",
@@ -80,6 +81,9 @@ class User extends Model {
 
   @HasMany(() => TaskFiles)
   filesAddedToTasks!: TaskFiles[];
+
+  @HasMany(() => TaskScheduled)
+  tasksScheduled!: TaskScheduled[];
 }
 
 export default User;
