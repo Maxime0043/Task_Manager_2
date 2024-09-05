@@ -7,12 +7,14 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  BelongsToMany,
 } from "sequelize-typescript";
 
 import UserRoles from "./user_role";
 import Client from "./client";
 import Project from "./project";
 import Task from "./task";
+import TaskUsers from "./task_users";
 
 @Table({
   modelName: "User",
@@ -71,6 +73,9 @@ class User extends Model {
 
   @HasMany(() => Task, "creatorId")
   tasksCreated!: Task[];
+
+  @BelongsToMany(() => Task, () => TaskUsers, "userId", "taskId")
+  tasksAssigned!: Task[];
 }
 
 export default User;

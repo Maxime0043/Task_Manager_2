@@ -5,11 +5,13 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  BelongsToMany,
 } from "sequelize-typescript";
 
 import User from "./user";
 import Project from "./project";
 import TaskStatus from "./task_status";
+import TaskUsers from "./task_users";
 
 export const TASK_PRIORITIES = {
   HIGH: "high",
@@ -74,11 +76,14 @@ class Task extends Model {
   @BelongsTo(() => TaskStatus)
   taskStatus!: TaskStatus;
 
-  @BelongsTo(() => User)
+  @BelongsTo(() => User, "creatorId")
   creator!: User;
 
   @BelongsTo(() => Project)
   project!: Project;
+
+  @BelongsToMany(() => User, () => TaskUsers, "taskId", "userId")
+  usersAssigned!: User[];
 }
 
 export default Task;
