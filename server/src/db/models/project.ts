@@ -5,11 +5,13 @@ import {
   DataType,
   ForeignKey,
   BelongsTo,
+  HasMany,
 } from "sequelize-typescript";
 
 import User from "./user";
 import Client from "./client";
 import ProjectStatus from "./project_status";
+import Task from "./task";
 
 @Table({
   modelName: "Project",
@@ -67,6 +69,9 @@ class Project extends Model {
 
   @BelongsTo(() => User, "creatorId")
   creator!: User;
+
+  @HasMany(() => Task)
+  tasks!: Task[];
 }
 
 export default Project;

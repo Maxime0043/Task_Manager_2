@@ -1,4 +1,13 @@
-import { Table, Column, Model, DataType, Is } from "sequelize-typescript";
+import {
+  Table,
+  Column,
+  Model,
+  DataType,
+  Is,
+  HasMany,
+} from "sequelize-typescript";
+
+import Task from "./task";
 
 @Table({
   modelName: "TaskStatus",
@@ -28,7 +37,8 @@ class TaskStatus extends Model {
    * ASSOCIATIONS
    */
 
-  // Add associations here
+  @HasMany(() => Task)
+  tasks!: Task[];
 }
 
 export default TaskStatus;

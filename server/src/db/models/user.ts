@@ -12,6 +12,7 @@ import {
 import UserRoles from "./user_role";
 import Client from "./client";
 import Project from "./project";
+import Task from "./task";
 
 @Table({
   modelName: "User",
@@ -67,6 +68,9 @@ class User extends Model {
 
   @HasMany(() => Project, "creatorId")
   projectsCreated!: Project[];
+
+  @HasMany(() => Task, "creatorId")
+  tasksCreated!: Task[];
 }
 
 export default User;

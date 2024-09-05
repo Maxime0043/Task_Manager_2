@@ -4,6 +4,7 @@ import {
   Model,
   DataType,
   ForeignKey,
+  BelongsTo,
 } from "sequelize-typescript";
 
 import User from "./user";
@@ -70,7 +71,14 @@ class Task extends Model {
    * ASSOCIATIONS
    */
 
-  // Add associations here
+  @BelongsTo(() => TaskStatus)
+  taskStatus!: TaskStatus;
+
+  @BelongsTo(() => User)
+  creator!: User;
+
+  @BelongsTo(() => Project)
+  project!: Project;
 }
 
 export default Task;
