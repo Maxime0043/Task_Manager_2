@@ -45,6 +45,22 @@ class TaskScheduled extends Model {
   @Column({ type: DataType.UUID, allowNull: false })
   userId!: string;
 
+  @Column(DataType.VIRTUAL)
+  get duration() {
+    const today = new Date();
+    const day =
+      today.getFullYear() +
+      "-" +
+      (today.getMonth() + 1) +
+      "-" +
+      today.getDate();
+
+    const start = new Date(day + " " + this.start);
+    const end = new Date(day + " " + this.end);
+
+    return (end.getTime() - start.getTime()) / 1000 / 60 / 60; // in hours
+  }
+
   /**
    * ASSOCIATIONS
    */
