@@ -17,6 +17,7 @@ module.exports = {
       "ProjectStatus",
       [
         {
+          id: 1,
           name: "not_started",
           label: "Not Started",
           color: "#FF0000",
@@ -24,6 +25,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
+          id: 2,
           name: "in_progress",
           label: "In Progress",
           color: "#00FF00",
@@ -31,6 +33,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
+          id: 3,
           name: "completed",
           label: "Completed",
           color: "#0000FF",
@@ -38,6 +41,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
+          id: 4,
           name: "on_hold",
           label: "On Hold",
           color: "#FFFF00",
@@ -45,6 +49,7 @@ module.exports = {
           updatedAt: new Date(),
         },
         {
+          id: 5,
           name: "discontinued",
           label: "Discontinued",
           color: "#FF00FF",

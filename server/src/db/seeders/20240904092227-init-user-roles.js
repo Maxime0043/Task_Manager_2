@@ -17,18 +17,21 @@ module.exports = {
       "UserRoles",
       [
         {
+          id: 1,
           name: "developer",
           label: "Developer",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
+          id: 2,
           name: "graphic_designer",
           label: "Graphic Designer",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
+          id: 3,
           name: "project_manager",
           label: "Project Manager",
           createdAt: new Date(),
@@ -47,6 +50,6 @@ module.exports = {
      * await queryInterface.bulkDelete('People', null, {});
      */
 
-    await queryInterface.bulkDelete("People", null, {});
+    await queryInterface.bulkDelete("UserRoles", null, {});
   },
 };
