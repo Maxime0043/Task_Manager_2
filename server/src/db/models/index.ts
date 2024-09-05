@@ -29,6 +29,7 @@ import TaskFiles from "./task_files";
 import TaskScheduled from "./task_scheduled";
 import Conversation from "./conversation";
 import ConversationUsers from "./conversation_users";
+import ConversationProjects from "./conversation_projects";
 
 sequelize.addModels([
   UserRoles,
@@ -43,6 +44,7 @@ sequelize.addModels([
   TaskScheduled,
   Conversation,
   ConversationUsers,
+  ConversationProjects,
 ]);
 
 db.UserRoles = UserRoles;
@@ -57,6 +59,7 @@ db.TaskFiles = TaskFiles;
 db.TaskScheduled = TaskScheduled;
 db.Conversation = Conversation;
 db.ConversationUsers = ConversationUsers;
+db.ConversationProjects = ConversationProjects;
 
 // Export the sequelize instance
 db.sequelize = sequelize;
