@@ -9,4 +9,4 @@ const router = express.Router();
 // Define the API routes
 
 // Export the router
-module.exports = router;
+export default router;

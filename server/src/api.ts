@@ -22,7 +22,7 @@ app.use(
 app.use(express.json());
 
 // Define the API routes
-const routes = require("./routes");
+import routes from "./routes";
 
 app.use("/api/v1", routes);
 
