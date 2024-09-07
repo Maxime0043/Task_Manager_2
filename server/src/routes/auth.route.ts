@@ -6,8 +6,8 @@ const router = express.Router();
 import { signin, signup } from "../controllers/auth.controller";
 
 // Define the API routes
-router.get("/signup", signup);
-router.get("/signin", signin);
+router.post("/signup", signup);
+router.post("/signin", signin);
 
 // Export the router
 export default router;
