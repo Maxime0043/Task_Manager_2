@@ -5,6 +5,7 @@ dotenv.config();
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
+import "express-async-errors";
 
 const app = express();
 
@@ -25,6 +26,11 @@ app.use(express.json());
 import routes from "./routes";
 
 app.use("/api/v1", routes);
+
+// Error Handler
+import { errorHandler } from "./middlewares/errors.middleware";
+
+app.use(errorHandler);
 
 // Export the express app
 export default app;
