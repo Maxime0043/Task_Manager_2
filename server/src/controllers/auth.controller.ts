@@ -1,7 +1,12 @@
+import dotenv from "dotenv";
+
+dotenv.config();
+
 import { Request, Response } from "express";
 import Joi from "joi";
 import bcrypt from "bcrypt";
 import { BaseError } from "sequelize";
+import jwt from "jsonwebtoken";
 
 import User from "../db/models/user";
 import JoiError from "../errors/JoiError";
@@ -38,7 +43,13 @@ export async function signup(req: Request, res: Response) {
     // Create a new user
     const user = await User.create(value);
 
-    return res.status(201).json(user);
+    // Generate the jwt token
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_PRIVATE_KEY!);
+
+    // Set the token in the session
+    req.session.token = token;
+
+    return res.sendStatus(201);
   } catch (err) {
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
@@ -78,5 +89,23 @@ export async function signin(req: Request, res: Response) {
     return res.sendStatus(401);
   }
 
-  return res.status(200).json(user);
+  // Generate the jwt token
+  const token = jwt.sign({ userId: user.id }, process.env.JWT_PRIVATE_KEY!);
+
+  // Set the token in the session
+  req.session.token = token;
+
+  return res.sendStatus(200);
+}
+
+export async function signout(req: Request, res: Response) {
+  req.session.token = "";
+
+  req.session.destroy((err) => {
+    if (err) {
+      throw err;
+    }
+
+    return res.sendStatus(200);
+  });
 }
