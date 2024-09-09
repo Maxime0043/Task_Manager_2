@@ -1,5 +1,7 @@
 import { NextFunction, Request, Response } from "express";
+
 import JoiError from "../errors/JoiError";
+import SequelizeError from "../errors/SequelizeError";
 
 export function errorHandler(
   err: Error,
@@ -8,6 +10,8 @@ export function errorHandler(
   next: NextFunction
 ) {
   if (err instanceof JoiError) {
+    return res.status(err.statusCode).json({ error: err.errors });
+  } else if (err instanceof SequelizeError) {
     return res.status(err.statusCode).json({ error: err.errors });
   }
 
