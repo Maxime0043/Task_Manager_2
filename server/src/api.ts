@@ -23,6 +23,13 @@ const store = new SequelizeStore({
   table: "Session",
 });
 
+// Define the session data
+declare module "express-session" {
+  interface Session {
+    token: string;
+  }
+}
+
 // Define Helmet
 app.use(helmet());
 // Define CORS

@@ -46,7 +46,10 @@ export async function signup(req: Request, res: Response) {
     // Generate the jwt token
     const token = jwt.sign({ userId: user.id }, process.env.JWT_PRIVATE_KEY!);
 
-    return res.status(201).json({ token });
+    // Set the token in the session
+    req.session.token = token;
+
+    return res.sendStatus(201);
   } catch (err) {
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
@@ -89,5 +92,8 @@ export async function signin(req: Request, res: Response) {
   // Generate the jwt token
   const token = jwt.sign({ userId: user.id }, process.env.JWT_PRIVATE_KEY!);
 
-  return res.status(200).json({ token });
+  // Set the token in the session
+  req.session.token = token;
+
+  return res.sendStatus(200);
 }
