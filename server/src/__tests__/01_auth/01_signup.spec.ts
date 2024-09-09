@@ -171,6 +171,15 @@ describe(`POST ${url}`, () => {
     });
 
     expect(res.status).toBe(201);
+    expect(res.header).toHaveProperty("set-cookie");
+    expect(res.header["set-cookie"]).toHaveLength(1);
+    expect(res.header["set-cookie"][0]).toMatch(/^connect\.sid=/);
+
+    const user = await User.findOne({
+      where: { email: "john.doe@example.com" },
+    });
+
+    expect(user).toBeDefined();
   });
 
   it("should return 400 if the email is already taken", async () => {
