@@ -1,8 +1,11 @@
 import { Request, Response } from "express";
 import Joi from "joi";
 import bcrypt from "bcrypt";
+import { BaseError } from "sequelize";
 
 import User from "../db/models/user";
+import JoiError from "../errors/JoiError";
+import SequelizeError from "../errors/SequelizeError";
 
 export async function signup(req: Request, res: Response) {
   const payload = req.body;
@@ -24,9 +27,7 @@ export async function signup(req: Request, res: Response) {
   const { value, error } = schema.validate(payload, { abortEarly: false });
 
   if (error) {
-    return res
-      .status(400)
-      .json({ error: error.details.map((error) => error.message) });
+    throw new JoiError({ error });
   }
 
   // Remove passwordConfirmation from the payload
@@ -39,7 +40,11 @@ export async function signup(req: Request, res: Response) {
 
     return res.status(201).json(user);
   } catch (err) {
-    return res.status(409).json({ error: err });
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
   }
 }
 
@@ -56,9 +61,7 @@ export async function signin(req: Request, res: Response) {
   const { value, error } = schema.validate(payload, { abortEarly: false });
 
   if (error) {
-    return res
-      .status(400)
-      .json({ error: error.details.map((error) => error.message) });
+    throw new JoiError({ error });
   }
 
   // Find the user by email
