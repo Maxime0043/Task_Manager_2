@@ -8,7 +8,8 @@
     "tsc": "npx tsc",
     "watch": "npx tsc --watch",
     "build": "webpack",
-    "bundleup": "webpack-cli --watch"
+    "bundleup": "webpack-cli --watch",
+    "test": "npx jest __tests__/* --runInBand"
   },
   "keywords": [],
   "author": "",
