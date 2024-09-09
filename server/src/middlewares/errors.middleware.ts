@@ -10,9 +10,9 @@ export function errorHandler(
   next: NextFunction
 ) {
   if (err instanceof JoiError) {
-    return res.status(err.statusCode).json({ error: err.errors });
+    return res.status(err.statusCode).json({ errors: err.errors });
   } else if (err instanceof SequelizeError) {
-    return res.status(err.statusCode).json({ error: err.errors });
+    return res.status(err.statusCode).json({ errors: err.errors });
   }
 
   console.error(err);
