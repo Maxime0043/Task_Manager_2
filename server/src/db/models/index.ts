@@ -33,6 +33,7 @@ import ConversationProjects from "./conversation_projects";
 import ConversationTasks from "./conversation_tasks";
 import Message from "./message";
 import MessageFiles from "./message_files";
+import Session from "./session";
 
 sequelize.addModels([
   UserRoles,
@@ -51,6 +52,7 @@ sequelize.addModels([
   ConversationTasks,
   Message,
   MessageFiles,
+  Session,
 ]);
 
 db.UserRoles = UserRoles;
@@ -69,6 +71,7 @@ db.ConversationProjects = ConversationProjects;
 db.ConversationTasks = ConversationTasks;
 db.Message = Message;
 db.MessageFiles = MessageFiles;
+db.Session = Session;
 
 // Export the sequelize instance
 db.sequelize = sequelize;
