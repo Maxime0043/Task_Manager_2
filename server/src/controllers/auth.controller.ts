@@ -97,3 +97,15 @@ export async function signin(req: Request, res: Response) {
 
   return res.sendStatus(200);
 }
+
+export async function signout(req: Request, res: Response) {
+  req.session.token = "";
+
+  req.session.destroy((err) => {
+    if (err) {
+      throw err;
+    }
+
+    return res.sendStatus(200);
+  });
+}
