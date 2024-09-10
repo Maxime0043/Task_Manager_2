@@ -17,7 +17,7 @@ export async function listAll(req: Request, res: Response) {
   // Create JOI Schema to validate the query params
   const schema = Joi.object({
     name: Joi.string().trim().max(255),
-    email: Joi.string().trim().email().max(255),
+    email: Joi.string().trim().max(255),
     deleted: Joi.string().lowercase().valid("true", "false"),
     limit: Joi.number().integer().min(1).required(),
     offset: Joi.number().integer().min(0),
