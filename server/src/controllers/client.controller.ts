@@ -111,3 +111,31 @@ export async function update(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function remove(req: Request, res: Response) {
+  const { id } = req.params;
+
+  const client = await Client.findByPk(id);
+
+  if (!client) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Client not found",
+    });
+  }
+
+  // Continue with the client removal process
+  try {
+    // Remove the client
+    await client.destroy();
+
+    return res.sendStatus(200);
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}

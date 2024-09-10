@@ -9,6 +9,7 @@ import {
   create,
   details,
   listAll,
+  remove,
   update,
 } from "../controllers/client.controller";
 
@@ -17,6 +18,7 @@ router.get("/", listAll);
 router.get("/:id", details);
 router.post("/", create);
 router.put("/:id", update);
+router.delete("/:id", remove);
 
 // Export the router
 export default router;
