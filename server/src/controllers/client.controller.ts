@@ -64,3 +64,50 @@ export async function create(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function update(req: Request, res: Response) {
+  const { id } = req.params;
+
+  const client = await Client.findByPk(id);
+
+  if (!client) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Client not found",
+    });
+  }
+
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    name: Joi.string().trim().max(255),
+    email: Joi.string().trim().email().max(255),
+    phone: Joi.string()
+      .trim()
+      .regex(/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/),
+    description: Joi.string().trim(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Continue with the client update process
+  try {
+    // Update the client
+    const updatedClient = await client.update(value);
+
+    return res.status(200).json({ client: updatedClient });
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
