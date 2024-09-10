@@ -23,7 +23,9 @@ export async function listAll(req: Request, res: Response) {
   } = req.query;
 
   // Retrieve the Projects columns
-  const projectColumns = Object.keys(Project.getAttributes());
+  const projectColumns = Object.keys(Project.getAttributes()).map((column) =>
+    column.toLowerCase()
+  );
 
   // Create JOI Schema to validate the query params
   const schema = Joi.object({

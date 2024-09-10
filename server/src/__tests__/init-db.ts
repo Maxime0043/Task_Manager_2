@@ -2,6 +2,7 @@ import UserRoles from "../db/models/user_role";
 import ProjectStatus from "../db/models/project_status";
 import TaskStatus from "../db/models/task_status";
 import Client from "../db/models/client";
+import Project from "../db/models/project";
 
 export default async function initDB() {
   // Create the UserRoles
@@ -134,4 +135,26 @@ export async function populateClients(creatorId: string) {
   }
 
   await Client.bulkCreate(clients);
+}
+
+export async function populateProjects(creatorId: string, clientId: string) {
+  // Create the projects
+  const projects: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    projects.push({
+      name: `Project ${i}`,
+      statusId: 1,
+      budget: Math.floor(Math.random() * 100000),
+      description: `Description of the project ${i}`,
+      isInternalProject: Math.random() >= 0.5,
+      managerId: creatorId,
+      clientId,
+      creatorId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await Project.bulkCreate(projects);
 }

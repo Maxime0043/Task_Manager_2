@@ -34,7 +34,7 @@ class Project extends Model {
   @Column({ type: DataType.INTEGER, allowNull: false })
   statusId!: number;
 
-  @Column({ type: DataType.DECIMAL(12, 2), allowNull: false })
+  @Column({ type: DataType.DECIMAL(12, 2), allowNull: true })
   budget!: number;
 
   @Column({ type: DataType.TEXT, allowNull: true })
