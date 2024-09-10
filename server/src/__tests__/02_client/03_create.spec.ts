@@ -11,7 +11,7 @@ const url = "/api/v1/clients";
 var cookie: string;
 var userId: string;
 
-describe(`GET ${url}`, () => {
+describe(`POST ${url}`, () => {
   beforeAll(async () => {
     // Sync the database
     await db.sequelize.sync({ force: true });

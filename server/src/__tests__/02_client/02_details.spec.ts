@@ -12,7 +12,7 @@ const urlWithoutId = "/api/v1/clients";
 var url = urlWithoutId;
 var cookie: string;
 
-describe(`GET ${url}`, () => {
+describe(`GET ${url}/:id`, () => {
   beforeAll(async () => {
     // Sync the database
     await db.sequelize.sync({ force: true });
