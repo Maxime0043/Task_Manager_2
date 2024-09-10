@@ -3,7 +3,9 @@ import { Op } from "sequelize";
 import Joi from "joi";
 
 import JoiError from "../errors/JoiError";
+import SimpleError from "../errors/SimpleError";
 import Project from "../db/models/project";
+import { verifyIdIsUUID } from "../utils/joi_utils";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -79,4 +81,28 @@ export async function listAll(req: Request, res: Response) {
   });
 
   return res.status(200).json({ projects });
+}
+
+export async function details(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the project
+  const project = await Project.findByPk(id);
+
+  if (!project) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Project not found",
+    });
+  }
+
+  return res.status(200).json({ project });
 }
