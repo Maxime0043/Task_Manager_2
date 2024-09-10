@@ -114,6 +114,13 @@ export default class JoiError extends Error {
             value: "number",
           });
           break;
+        case "boolean.base":
+          list.push({
+            [name]: err.context?.key,
+            name: "type",
+            value: "boolean",
+          });
+          break;
         default:
           list.push({
             [name]: err.context?.key,

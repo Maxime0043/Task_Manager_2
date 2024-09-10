@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { Op } from "sequelize";
+import { BaseError, Op } from "sequelize";
 import Joi from "joi";
 
 import JoiError from "../errors/JoiError";
 import SimpleError from "../errors/SimpleError";
+import SequelizeError from "../errors/SequelizeError";
 import Project from "../db/models/project";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 
@@ -105,4 +106,41 @@ export async function details(req: Request, res: Response) {
   }
 
   return res.status(200).json({ project });
+}
+
+export async function create(req: Request, res: Response) {
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    name: Joi.string().trim().max(255).required(),
+    statusId: Joi.number().integer().min(1).required(),
+    budget: Joi.number().min(0).precision(2),
+    description: Joi.string().trim(),
+    isInternalProject: Joi.boolean().required(),
+    managerId: Joi.string().uuid({ version: "uuidv4" }).required(),
+    clientId: Joi.string().uuid({ version: "uuidv4" }).required(),
+    creatorId: Joi.string().uuid({ version: "uuidv4" }).required(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Continue with the project creation process
+  try {
+    // Create a new project
+    const project = await Project.create(value);
+
+    return res.status(201).json({ project });
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
 }
