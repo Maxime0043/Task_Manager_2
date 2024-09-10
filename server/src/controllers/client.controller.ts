@@ -6,6 +6,7 @@ import Client from "../db/models/client";
 import SimpleError from "../errors/SimpleError";
 import JoiError from "../errors/JoiError";
 import SequelizeError from "../errors/SequelizeError";
+import { verifyIdIsUUID } from "../utils/joi_utils";
 
 export async function listAll(req: Request, res: Response) {
   const clients = await Client.findAll();
@@ -16,6 +17,14 @@ export async function listAll(req: Request, res: Response) {
 export async function details(req: Request, res: Response) {
   const { id } = req.params;
 
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the client
   const client = await Client.findByPk(id);
 
   if (!client) {
@@ -68,6 +77,14 @@ export async function create(req: Request, res: Response) {
 export async function update(req: Request, res: Response) {
   const { id } = req.params;
 
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the client to update
   const client = await Client.findByPk(id);
 
   if (!client) {
@@ -115,6 +132,14 @@ export async function update(req: Request, res: Response) {
 export async function remove(req: Request, res: Response) {
   const { id } = req.params;
 
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the client to delete
   const client = await Client.findByPk(id);
 
   if (!client) {
@@ -143,6 +168,14 @@ export async function remove(req: Request, res: Response) {
 export async function restore(req: Request, res: Response) {
   const { id } = req.params;
 
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the client to restore
   const client = await Client.findByPk(id, { paranoid: false });
 
   if (!client) {
