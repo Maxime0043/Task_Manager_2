@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { BaseError } from "sequelize";
+import { BaseError, FindOptions, Op } from "sequelize";
 import Joi from "joi";
 
 import Client from "../db/models/client";
@@ -9,7 +9,54 @@ import SequelizeError from "../errors/SequelizeError";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 
 export async function listAll(req: Request, res: Response) {
-  const clients = await Client.findAll();
+  const { name, email, deleted, limit, offset, orderBy, dir } = req.query;
+
+  // Retrieve the Clients columns
+  const clientColumns = Object.keys(Client.getAttributes());
+
+  // Create JOI Schema to validate the query params
+  const schema = Joi.object({
+    name: Joi.string().trim().max(255),
+    email: Joi.string().trim().email().max(255),
+    deleted: Joi.string().lowercase().valid("true", "false"),
+    limit: Joi.number().integer().min(1).required(),
+    offset: Joi.number().integer().min(0),
+    orderBy: Joi.string()
+      .lowercase()
+      .valid(...clientColumns),
+    dir: Joi.string().lowercase().valid("asc", "desc"),
+  });
+
+  // Validate the query params
+  const { error: errorParams } = schema.validate(req.query, {
+    abortEarly: false,
+  });
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Create the where object
+  const where: any = {};
+
+  if (name) {
+    where.name = { [Op.like]: `%${name}%` };
+  }
+  if (email) {
+    where.email = { [Op.like]: `%${email}%` };
+  }
+
+  // Find the clients
+  const clients = await Client.findAll({
+    paranoid: deleted === "true" ? false : undefined,
+    where,
+    limit: parseInt(limit as string),
+    offset: offset ? parseInt(offset as string) : undefined,
+    order:
+      orderBy && dir
+        ? [[orderBy as string, dir === "asc" ? "ASC" : "DESC"]]
+        : undefined,
+  });
 
   return res.status(200).json({ clients });
 }

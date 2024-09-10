@@ -49,7 +49,9 @@ export default class JoiError extends Error {
           list.push({
             [name]: err.context?.key,
             name: "mismatched",
-            value: err.context?.valids[0]?.key,
+            value: err.message.includes("must be [ref:")
+              ? err.context?.valids[0]?.key
+              : err.context?.valids,
           });
           break;
         case "object.unknown":
