@@ -11,7 +11,7 @@ import clientRoutes from "./client.route";
 
 // Define the API routes
 router.use("/auth", [auth], authRoutes);
-router.use("/client", [auth, authRequired], clientRoutes);
+router.use("/clients", [auth, authRequired], clientRoutes);
 
 // Export the router
 export default router;
