@@ -1,6 +1,7 @@
 import UserRoles from "../db/models/user_role";
 import ProjectStatus from "../db/models/project_status";
 import TaskStatus from "../db/models/task_status";
+import Client from "../db/models/client";
 
 export default async function initDB() {
   // Create the UserRoles
@@ -115,4 +116,22 @@ export default async function initDB() {
       updatedAt: new Date(),
     },
   ]);
+}
+
+export async function populateClients(creatorId: string) {
+  // Create the clients
+  const clients: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    clients.push({
+      name: `Client ${i}`,
+      email: `client${i}@example.com`,
+      description: `Description of the client ${i}`,
+      creatorId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await Client.bulkCreate(clients);
 }

@@ -1,8 +1,4 @@
-import dotenv from "dotenv";
-
-dotenv.config();
-
-process.env.ENV_TYPE = "test";
+import "../init-tests";
 
 import supertest from "supertest";
 import app from "../../api";
