@@ -200,3 +200,39 @@ export async function update(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function remove(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the project to delete
+  const project = await Project.findByPk(id);
+
+  if (!project) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Project not found",
+    });
+  }
+
+  // Continue with the project removal process
+  try {
+    // Remove the project
+    await project.destroy();
+
+    return res.sendStatus(200);
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
