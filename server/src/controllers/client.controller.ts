@@ -139,3 +139,31 @@ export async function remove(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function restore(req: Request, res: Response) {
+  const { id } = req.params;
+
+  const client = await Client.findByPk(id, { paranoid: false });
+
+  if (!client) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Client not found",
+    });
+  }
+
+  // Continue with the client restoration process
+  try {
+    // Restore the client
+    await client.restore();
+
+    return res.sendStatus(200);
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
