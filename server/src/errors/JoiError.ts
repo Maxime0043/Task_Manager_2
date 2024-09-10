@@ -83,6 +83,20 @@ export default class JoiError extends Error {
             value: err.context?.limit,
           });
           break;
+        case "string.pattern.base":
+          list.push({
+            field: err.context?.key,
+            name: "regex",
+            value: err.context?.regex.toString(),
+          });
+          break;
+        case "string.guid":
+          list.push({
+            field: err.context?.key,
+            name: "type",
+            value: "uuid",
+          });
+          break;
         case "number.base":
           list.push({
             field: err.context?.key,
