@@ -1,8 +1,16 @@
+import dotenv from "dotenv";
+
+dotenv.config();
+
 import { Request, Response } from "express";
 import Joi from "joi";
 import bcrypt from "bcrypt";
+import { BaseError } from "sequelize";
+import jwt from "jsonwebtoken";
 
 import User from "../db/models/user";
+import JoiError from "../errors/JoiError";
+import SequelizeError from "../errors/SequelizeError";
 
 export async function signup(req: Request, res: Response) {
   const payload = req.body;
@@ -24,9 +32,7 @@ export async function signup(req: Request, res: Response) {
   const { value, error } = schema.validate(payload, { abortEarly: false });
 
   if (error) {
-    return res
-      .status(400)
-      .json({ error: error.details.map((error) => error.message) });
+    throw new JoiError({ error });
   }
 
   // Remove passwordConfirmation from the payload
@@ -37,9 +43,19 @@ export async function signup(req: Request, res: Response) {
     // Create a new user
     const user = await User.create(value);
 
-    return res.status(201).json(user);
+    // Generate the jwt token
+    const token = jwt.sign({ userId: user.id }, process.env.JWT_PRIVATE_KEY!);
+
+    // Set the token in the session
+    req.session.token = token;
+
+    return res.sendStatus(201);
   } catch (err) {
-    return res.status(409).json({ error: err });
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
   }
 }
 
@@ -56,24 +72,40 @@ export async function signin(req: Request, res: Response) {
   const { value, error } = schema.validate(payload, { abortEarly: false });
 
   if (error) {
-    return res
-      .status(400)
-      .json({ error: error.details.map((error) => error.message) });
+    throw new JoiError({ error });
   }
 
   // Find the user by email
   const user = await User.findOne({ where: { email: value.email } });
 
   if (!user) {
-    return res.status(404).json({ error: "User not found" });
+    return res.sendStatus(401);
   }
 
   // Check if the password is correct
   const isPasswordValid = await bcrypt.compare(value.password, user.password);
 
   if (!isPasswordValid) {
-    return res.status(400).json({ error: "Invalid password" });
-  } else {
-    return res.status(200).json(user);
+    return res.sendStatus(401);
   }
+
+  // Generate the jwt token
+  const token = jwt.sign({ userId: user.id }, process.env.JWT_PRIVATE_KEY!);
+
+  // Set the token in the session
+  req.session.token = token;
+
+  return res.sendStatus(200);
+}
+
+export async function signout(req: Request, res: Response) {
+  req.session.token = "";
+
+  req.session.destroy((err) => {
+    if (err) {
+      throw err;
+    }
+
+    return res.sendStatus(200);
+  });
 }
