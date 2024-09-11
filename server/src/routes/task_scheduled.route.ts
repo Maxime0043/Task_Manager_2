@@ -3,6 +3,7 @@ import {
   create,
   details,
   listAll,
+  update,
 } from "../controllers/task_scheduled.controller";
 
 const router = express.Router();
@@ -15,6 +16,7 @@ const router = express.Router();
 router.get("/", listAll);
 router.get("/:id", details);
 router.post("/", create);
+router.put("/:id", update);
 
 // Export the router
 export default router;

@@ -172,3 +172,60 @@ export async function create(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function update(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the taskScheduled to update
+  const taskScheduled = await TaskScheduled.findByPk(id);
+
+  if (!taskScheduled) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Task not found",
+    });
+  }
+
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    date: Joi.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    start: Joi.string().regex(/^\d{2}:\d{2}:\d{2}$/),
+    end: Joi.string().regex(/^\d{2}:\d{2}:\d{2}$/),
+    taskId: Joi.string().uuid({ version: "uuidv4" }),
+    projectId: Joi.string().uuid({ version: "uuidv4" }).when("taskId", {
+      is: Joi.exist(),
+      then: Joi.forbidden(),
+    }),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Continue with the taskScheduled update process
+  try {
+    // Update the taskScheduled
+    const updatedTask = await taskScheduled.update(value);
+
+    return res.status(200).json({ taskScheduled: updatedTask });
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
