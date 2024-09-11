@@ -5,10 +5,11 @@ const router = express.Router();
 // Import Middlewares
 
 // Import Controllers
-import { listAll } from "../controllers/task.controller";
+import { details, listAll } from "../controllers/task.controller";
 
 // Define the API routes
 router.get("/", listAll);
+router.get("/:id", details);
 
 // Export the router
 export default router;
