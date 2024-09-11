@@ -81,30 +81,42 @@ describe(`POST ${url}`, () => {
       statusId: 1,
       projectId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
       creatorId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
+      usersAssigned: ["353f3f22-76df-4bf2-b3de-97f05ed30c3a"], // random UUID
     },
     {
       name: "Project 1",
       statusId: 1,
       projectId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
       creatorId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
+      usersAssigned: ["353f3f22-76df-4bf2-b3de-97f05ed30c3a"], // random UUID
     },
     {
       name: "Project 1",
       timeEstimate: 16,
       projectId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
       creatorId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
+      usersAssigned: ["353f3f22-76df-4bf2-b3de-97f05ed30c3a"], // random UUID
     },
     {
       name: "Project 1",
       timeEstimate: 16,
       statusId: 1,
       creatorId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
+      usersAssigned: ["353f3f22-76df-4bf2-b3de-97f05ed30c3a"], // random UUID
     },
     {
       name: "Project 1",
       timeEstimate: 16,
       statusId: 1,
       projectId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
+      usersAssigned: ["353f3f22-76df-4bf2-b3de-97f05ed30c3a"], // random UUID
+    },
+    {
+      name: "Project 1",
+      timeEstimate: 16,
+      statusId: 1,
+      projectId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
+      creatorId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
     },
   ])("should return 400 if an element is not provided", async (obj) => {
     const res = await supertest(app).post(url).set("Cookie", cookie).send(obj);
@@ -116,6 +128,7 @@ describe(`POST ${url}`, () => {
       "statusId",
       "projectId",
       "creatorId",
+      "usersAssigned",
     ].find((key) => !obj.hasOwnProperty(key));
 
     expect(res.status).toBe(400);
@@ -138,11 +151,12 @@ describe(`POST ${url}`, () => {
         position: -1,
         projectId: 123456,
         creatorId: "invalid-uuid",
+        usersAssigned: ["invalid-uuid"],
       });
     const errors = res.body.errors;
 
     expect(res.status).toBe(400);
-    expect(errors).toHaveLength(9);
+    expect(errors).toHaveLength(10);
 
     expect(errors[0].field).toBe("name");
     expect(errors[0].name).toBe("max");
@@ -178,16 +192,24 @@ describe(`POST ${url}`, () => {
     expect(errors[8].field).toBe("creatorId");
     expect(errors[8].name).toBe("type");
     expect(errors[8].value).toBe("uuid");
+
+    expect(errors[9].field).toBe("usersAssigned[0]");
+    expect(errors[9].name).toBe("type");
+    expect(errors[9].value).toBe("uuid");
   });
 
   it("should return 400 if the creatorId is invalid", async () => {
-    const res = await supertest(app).post(url).set("Cookie", cookie).send({
-      name: `Task 1`,
-      timeEstimate: 16,
-      statusId: 1,
-      projectId,
-      creatorId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
-    });
+    const res = await supertest(app)
+      .post(url)
+      .set("Cookie", cookie)
+      .send({
+        name: `Task 1`,
+        timeEstimate: 16,
+        statusId: 1,
+        projectId,
+        creatorId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
+        usersAssigned: [userId],
+      });
     const errors = res.body.errors;
 
     expect(res.status).toBe(409);
@@ -197,13 +219,17 @@ describe(`POST ${url}`, () => {
   });
 
   it("should return 400 if the projectId is invalid", async () => {
-    const res = await supertest(app).post(url).set("Cookie", cookie).send({
-      name: `Task 1`,
-      timeEstimate: 16,
-      statusId: 1,
-      projectId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
-      creatorId: userId,
-    });
+    const res = await supertest(app)
+      .post(url)
+      .set("Cookie", cookie)
+      .send({
+        name: `Task 1`,
+        timeEstimate: 16,
+        statusId: 1,
+        projectId: "353f3f22-76df-4bf2-b3de-97f05ed30c3a", // random UUID
+        creatorId: userId,
+        usersAssigned: [userId],
+      });
     const errors = res.body.errors;
 
     expect(res.status).toBe(409);
@@ -213,14 +239,20 @@ describe(`POST ${url}`, () => {
   });
 
   it("should return 400 if the statusId is invalid", async () => {
-    const res = await supertest(app).post(url).set("Cookie", cookie).send({
-      name: `Task 1`,
-      timeEstimate: 16,
-      statusId: 99999,
-      projectId,
-      creatorId: userId,
-    });
+    const res = await supertest(app)
+      .post(url)
+      .set("Cookie", cookie)
+      .send({
+        name: `Task 1`,
+        timeEstimate: 16,
+        statusId: 99999,
+        projectId,
+        creatorId: userId,
+        usersAssigned: [userId],
+      });
     const errors = res.body.errors;
+
+    console.log(errors);
 
     expect(res.status).toBe(409);
     expect(errors).toHaveLength(1);
@@ -228,25 +260,49 @@ describe(`POST ${url}`, () => {
     expect(errors[0].name).toBe("foreign_key");
   });
 
+  it("should return 400 if the usersAssigned is invalid", async () => {
+    const res = await supertest(app)
+      .post(url)
+      .set("Cookie", cookie)
+      .send({
+        name: `Task 1`,
+        timeEstimate: 16,
+        statusId: 1,
+        projectId,
+        creatorId: userId,
+        usersAssigned: ["353f3f22-76df-4bf2-b3de-97f05ed30c3a"], // random UUID
+      });
+    const errors = res.body.errors;
+
+    expect(res.status).toBe(409);
+    expect(errors).toHaveLength(1);
+    expect(errors[0].field).toBe("usersAssigned[0]");
+    expect(errors[0].name).toBe("foreign_key");
+  });
+
   it("should return 201 if the task is created", async () => {
-    const res = await supertest(app).post(url).set("Cookie", cookie).send({
-      name: `Task 1`,
-      timeEstimate: "16.00",
-      deadline: "2024-09-12 09:30:00",
-      percentDone: 0,
-      statusId: 1,
-      description: `Description of the task 1`,
-      priority: "high",
-      position: 1,
-      projectId,
-      creatorId: userId,
-    });
+    const res = await supertest(app)
+      .post(url)
+      .set("Cookie", cookie)
+      .send({
+        name: `Task 1`,
+        timeEstimate: 16,
+        deadline: "2024-09-12 09:30:00",
+        percentDone: 0,
+        statusId: 1,
+        description: `Description of the task 1`,
+        priority: "high",
+        position: 1,
+        projectId,
+        creatorId: userId,
+        usersAssigned: [userId],
+      });
 
     const task = res.body.task;
 
     expect(res.status).toBe(201);
     expect(task.name).toBe("Task 1");
-    expect(task.timeEstimate).toBe(16);
+    expect(Number.parseFloat(task.timeEstimate)).toBe(16);
     expect(task.deadline).toBeDefined();
     expect(task.percentDone).toBe(0);
     expect(task.statusId).toBe(1);
@@ -255,5 +311,6 @@ describe(`POST ${url}`, () => {
     expect(task.position).toBe(1);
     expect(task.projectId).toBe(projectId);
     expect(task.creatorId).toBe(userId);
+    expect(task.usersAssigned).toHaveLength(1);
   });
 });

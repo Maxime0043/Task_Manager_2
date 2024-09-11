@@ -68,6 +68,7 @@ describe(`POST ${url}/:id`, () => {
       projectId: project.id,
       creatorId: user.id,
       deletedAt: new Date(),
+      usersAssigned: [user.id],
     });
 
     // Modify the URL to get the details of the task

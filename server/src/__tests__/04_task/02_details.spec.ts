@@ -120,5 +120,6 @@ describe(`GET ${url}/:id`, () => {
     expect(res.body.task.priority).toBe("high");
     expect(res.body.task.position).toBe(1);
     expect(res.body.task.projectId).toBeDefined();
+    expect(res.body.task.usersAssigned).toHaveLength(0);
   });
 });

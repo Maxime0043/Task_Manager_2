@@ -66,6 +66,7 @@ describe(`DELETE ${url}/:id`, () => {
       position: 1,
       projectId: project.id,
       creatorId: user.id,
+      usersAssigned: [user.id],
     });
 
     // Modify the URL to get the details of the project

@@ -4,7 +4,7 @@ import supertest from "supertest";
 import app from "../../api";
 
 import db from "../../db/models/index";
-import initDB, { populateProjects, populateTasks } from "../init-db";
+import initDB, { populateTasks } from "../init-db";
 import User from "../../db/models/user";
 import Client from "../../db/models/client";
 import Project from "../../db/models/project";
