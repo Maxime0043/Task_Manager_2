@@ -145,3 +145,63 @@ export async function create(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function update(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the task to update
+  const task = await Task.findByPk(id);
+
+  if (!task) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Task not found",
+    });
+  }
+
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    name: Joi.string().trim().max(255),
+    timeEstimate: Joi.number().min(0).precision(2),
+    deadline: Joi.date().iso(),
+    percentDone: Joi.number().integer().min(0).max(100),
+    statusId: Joi.number().integer().min(1),
+    description: Joi.string().trim(),
+    priority: Joi.string()
+      .lowercase()
+      .valid(...Object.values(TASK_PRIORITIES)),
+    position: Joi.number().integer().min(0),
+    projectId: Joi.string().uuid({ version: "uuidv4" }),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Continue with the task update process
+  try {
+    // Update the task
+    const updatedTask = await task.update(value);
+
+    return res.status(200).json({ task: updatedTask });
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}

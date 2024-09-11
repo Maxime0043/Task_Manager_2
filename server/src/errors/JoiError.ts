@@ -123,6 +123,13 @@ export default class JoiError extends Error {
             value: "boolean",
           });
           break;
+        case "date.base":
+          list.push({
+            [name]: err.context?.key,
+            name: "type",
+            value: "date",
+          });
+          break;
         default:
           list.push({
             [name]: err.context?.key,
