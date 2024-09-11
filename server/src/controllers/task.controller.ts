@@ -102,7 +102,13 @@ export async function details(req: Request, res: Response) {
   }
 
   // Find the task
-  const task = await Task.findByPk(id);
+  const task = await Task.findByPk(id, {
+    include: {
+      model: User,
+      as: "usersAssigned",
+      attributes: ["id", "firstname", "lastname", "icon"],
+    },
+  });
 
   if (!task) {
     throw new SimpleError({
