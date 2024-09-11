@@ -1,4 +1,5 @@
 import express from "express";
+import { listAll } from "../controllers/task_scheduled.controller";
 
 const router = express.Router();
 
@@ -7,6 +8,7 @@ const router = express.Router();
 // Import Controllers
 
 // Define the API routes
+router.get("/", listAll);
 
 // Export the router
 export default router;
