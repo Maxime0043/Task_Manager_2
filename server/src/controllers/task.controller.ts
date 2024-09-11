@@ -221,6 +221,9 @@ export async function update(req: Request, res: Response) {
       .valid(...Object.values(TASK_PRIORITIES)),
     position: Joi.number().integer().min(0),
     projectId: Joi.string().uuid({ version: "uuidv4" }),
+    usersAssigned: Joi.array()
+      .items(Joi.string().uuid({ version: "uuidv4" }))
+      .min(1),
   });
 
   // Validate the payload
@@ -230,10 +233,38 @@ export async function update(req: Request, res: Response) {
     throw new JoiError({ error });
   }
 
+  // Format the users assigned to the task
+  const usersAssigned: string[] | undefined = value.usersAssigned;
+  delete value.usersAssigned;
+
   // Continue with the task update process
   try {
     // Update the task
-    const updatedTask = await task.update(value);
+    var updatedTask = await task.update(value);
+
+    // Update the users assigned to the task
+    if (usersAssigned) {
+      // Remove the users that are not assigned anymore
+      await TaskUsers.destroy({
+        where: {
+          taskId: updatedTask.id,
+          userId: { [Op.notIn]: usersAssigned },
+        },
+      });
+
+      // Add the new users assigned
+      for (const userId of usersAssigned) {
+        await TaskUsers.findOrCreate({
+          where: { taskId: updatedTask.id, userId },
+          defaults: { taskId: updatedTask.id, userId },
+        });
+      }
+    }
+
+    // Reload the task with the users assigned
+    updatedTask = await updatedTask.reload({
+      include: { model: User, as: "usersAssigned" },
+    });
 
     return res.status(200).json({ task: updatedTask });
   } catch (err) {
