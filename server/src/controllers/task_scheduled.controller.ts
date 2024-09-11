@@ -229,3 +229,39 @@ export async function update(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function remove(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the taskScheduled to delete
+  const taskScheduled = await TaskScheduled.findByPk(id);
+
+  if (!taskScheduled) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "TaskScheduled not found",
+    });
+  }
+
+  // Continue with the taskScheduled removal process
+  try {
+    // Remove the taskScheduled
+    await taskScheduled.destroy();
+
+    return res.sendStatus(200);
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
