@@ -7,6 +7,8 @@ import SimpleError from "../errors/SimpleError";
 import SequelizeError from "../errors/SequelizeError";
 import Task, { TASK_PRIORITIES } from "../db/models/task";
 import { verifyIdIsUUID } from "../utils/joi_utils";
+import User from "../db/models/user";
+import TaskUsers from "../db/models/task_users";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -78,6 +80,13 @@ export async function listAll(req: Request, res: Response) {
       orderBy && dir
         ? [[orderBy as string, dir === "asc" ? "ASC" : "DESC"]]
         : undefined,
+    include: [
+      {
+        model: User,
+        as: "usersAssigned",
+        attributes: ["id", "firstname", "lastname", "icon"],
+      },
+    ],
   });
 
   return res.status(200).json({ tasks });
@@ -94,7 +103,13 @@ export async function details(req: Request, res: Response) {
   }
 
   // Find the task
-  const task = await Task.findByPk(id);
+  const task = await Task.findByPk(id, {
+    include: {
+      model: User,
+      as: "usersAssigned",
+      attributes: ["id", "firstname", "lastname", "icon"],
+    },
+  });
 
   if (!task) {
     throw new SimpleError({
@@ -124,6 +139,10 @@ export async function create(req: Request, res: Response) {
     position: Joi.number().integer().min(0),
     projectId: Joi.string().uuid({ version: "uuidv4" }).required(),
     creatorId: Joi.string().uuid({ version: "uuidv4" }).required(),
+    usersAssigned: Joi.array()
+      .items(Joi.string().uuid({ version: "uuidv4" }))
+      .min(1)
+      .required(),
   });
 
   // Validate the payload
@@ -133,13 +152,31 @@ export async function create(req: Request, res: Response) {
     throw new JoiError({ error });
   }
 
+  // Format the users assigned to the task
+  const usersAssigned = value.usersAssigned;
+  delete value.usersAssigned;
+
   // Continue with the task creation process
   try {
     // Create a new task
-    const task = await Task.create(value);
+    var task = await Task.create(value);
+
+    // Create the association between the task and the users assigned
+    for (const userId of usersAssigned) {
+      await TaskUsers.create({
+        taskId: task.id,
+        userId,
+      });
+    }
+
+    // Reload the task with the users assigned
+    task = await task.reload({
+      include: { model: User, as: "usersAssigned" },
+    });
 
     return res.status(201).json({ task });
   } catch (err) {
+    console.error(err);
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
     }
@@ -184,6 +221,9 @@ export async function update(req: Request, res: Response) {
       .valid(...Object.values(TASK_PRIORITIES)),
     position: Joi.number().integer().min(0),
     projectId: Joi.string().uuid({ version: "uuidv4" }),
+    usersAssigned: Joi.array()
+      .items(Joi.string().uuid({ version: "uuidv4" }))
+      .min(1),
   });
 
   // Validate the payload
@@ -193,10 +233,38 @@ export async function update(req: Request, res: Response) {
     throw new JoiError({ error });
   }
 
+  // Format the users assigned to the task
+  const usersAssigned: string[] | undefined = value.usersAssigned;
+  delete value.usersAssigned;
+
   // Continue with the task update process
   try {
     // Update the task
-    const updatedTask = await task.update(value);
+    var updatedTask = await task.update(value);
+
+    // Update the users assigned to the task
+    if (usersAssigned) {
+      // Remove the users that are not assigned anymore
+      await TaskUsers.destroy({
+        where: {
+          taskId: updatedTask.id,
+          userId: { [Op.notIn]: usersAssigned },
+        },
+      });
+
+      // Add the new users assigned
+      for (const userId of usersAssigned) {
+        await TaskUsers.findOrCreate({
+          where: { taskId: updatedTask.id, userId },
+          defaults: { taskId: updatedTask.id, userId },
+        });
+      }
+    }
+
+    // Reload the task with the users assigned
+    updatedTask = await updatedTask.reload({
+      include: { model: User, as: "usersAssigned" },
+    });
 
     return res.status(200).json({ task: updatedTask });
   } catch (err) {
