@@ -13,6 +13,7 @@ import Task from "../../db/models/task";
 const urlWithoutId = "/api/v1/tasks";
 var url = urlWithoutId;
 var cookie: string;
+var userId2: string;
 
 describe(`PUT ${url}/:id`, () => {
   beforeAll(async () => {
@@ -22,7 +23,7 @@ describe(`PUT ${url}/:id`, () => {
     // Initialize the database
     await initDB();
 
-    // Create a user
+    // Create users
     const user = await User.create({
       lastName: "Doe",
       firstName: "John",
@@ -31,6 +32,15 @@ describe(`PUT ${url}/:id`, () => {
       passwordConfirmation: "password",
       roleId: 1,
     });
+    const otherUser = await User.create({
+      lastName: "Smith",
+      firstName: "Jane",
+      email: "jane.smith@example.com",
+      password: "password",
+      passwordConfirmation: "password",
+      roleId: 1,
+    });
+    userId2 = otherUser.id;
 
     // Create a client
     const client = await Client.create({
@@ -64,6 +74,7 @@ describe(`PUT ${url}/:id`, () => {
       position: 1,
       projectId: project.id,
       creatorId: user.id,
+      usersAssigned: [user.id],
     });
 
     // Modify the URL to get the details of the task
@@ -119,11 +130,12 @@ describe(`PUT ${url}/:id`, () => {
         priority: "invalid",
         position: -1,
         projectId: 123456,
+        usersAssigned: ["invalid-uuid"],
       });
     const errors = res.body.errors;
 
     expect(res.status).toBe(400);
-    expect(errors).toHaveLength(8);
+    expect(errors).toHaveLength(9);
 
     expect(errors[0].field).toBe("name");
     expect(errors[0].name).toBe("max");
@@ -155,30 +167,39 @@ describe(`PUT ${url}/:id`, () => {
     expect(errors[7].field).toBe("projectId");
     expect(errors[7].name).toBe("type");
     expect(errors[7].value).toBe("string");
+
+    expect(errors[8].field).toBe("usersAssigned[0]");
+    expect(errors[8].name).toBe("type");
+    expect(errors[8].value).toBe("uuid");
   });
 
   it("should return 200 if the task is updated", async () => {
-    const res = await supertest(app).put(url).set("Cookie", cookie).send({
-      name: `Task 1 Modified`,
-      timeEstimate: "18.00",
-      deadline: "2024-09-12 09:30:00",
-      percentDone: 25,
-      statusId: 2,
-      description: `Description of the task 1 modified`,
-      priority: "normal",
-      position: 2,
-    });
+    const res = await supertest(app)
+      .put(url)
+      .set("Cookie", cookie)
+      .send({
+        name: `Task 1 Modified`,
+        timeEstimate: "18.00",
+        deadline: "2024-09-12 09:30:00",
+        percentDone: 25,
+        statusId: 2,
+        description: `Description of the task 1 modified`,
+        priority: "normal",
+        position: 2,
+        usersAssigned: [userId2],
+      });
 
     const task = res.body.task;
 
     expect(res.status).toBe(200);
     expect(task.name).toBe("Task 1 Modified");
-    expect(task.timeEstimate).toBe(18);
+    expect(Number.parseFloat(task.timeEstimate)).toBe(18);
     expect(task.deadline).toBeDefined();
     expect(task.percentDone).toBe(25);
     expect(task.statusId).toBe(2);
     expect(task.description).toBe("Description of the task 1 modified");
     expect(task.priority).toBe("normal");
     expect(task.position).toBe(2);
+    expect(task.usersAssigned).toHaveLength(1);
   });
 });
