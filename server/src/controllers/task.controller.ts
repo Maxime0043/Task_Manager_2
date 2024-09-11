@@ -30,7 +30,9 @@ export async function listAll(req: Request, res: Response) {
   const schema = Joi.object({
     name: Joi.string().trim().max(255),
     statusId: Joi.array().items(Joi.number().integer().min(1)),
-    priority: Joi.string().lowercase().valid("low", "medium", "high"),
+    priority: Joi.string()
+      .lowercase()
+      .valid(...Object.values(TASK_PRIORITIES)),
     projectId: Joi.string().uuid(),
     deleted: Joi.string().lowercase().valid("true", "false"),
     limit: Joi.number().integer().min(1).required(),
