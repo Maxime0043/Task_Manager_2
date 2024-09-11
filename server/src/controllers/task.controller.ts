@@ -5,7 +5,7 @@ import Joi from "joi";
 import JoiError from "../errors/JoiError";
 import SimpleError from "../errors/SimpleError";
 import SequelizeError from "../errors/SequelizeError";
-import Task from "../db/models/task";
+import Task, { TASK_PRIORITIES } from "../db/models/task";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 
 export async function listAll(req: Request, res: Response) {
@@ -103,4 +103,45 @@ export async function details(req: Request, res: Response) {
   }
 
   return res.status(200).json({ task });
+}
+
+export async function create(req: Request, res: Response) {
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    name: Joi.string().trim().max(255).required(),
+    timeEstimate: Joi.number().min(0).precision(2).required(),
+    deadline: Joi.date().iso(),
+    percentDone: Joi.number().integer().min(0).max(100),
+    statusId: Joi.number().integer().min(1).required(),
+    description: Joi.string().trim(),
+    priority: Joi.string()
+      .lowercase()
+      .valid(...Object.values(TASK_PRIORITIES)),
+    position: Joi.number().integer().min(0),
+    projectId: Joi.string().uuid({ version: "uuidv4" }).required(),
+    creatorId: Joi.string().uuid({ version: "uuidv4" }).required(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Continue with the task creation process
+  try {
+    // Create a new task
+    const task = await Task.create(value);
+
+    return res.status(201).json({ task });
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
 }

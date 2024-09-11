@@ -80,6 +80,7 @@ export default class JoiError extends Error {
           });
           break;
         case "string.min":
+        case "number.min":
           list.push({
             [name]: err.context?.key,
             name: "min",
@@ -87,6 +88,7 @@ export default class JoiError extends Error {
           });
           break;
         case "string.max":
+        case "number.max":
           list.push({
             [name]: err.context?.key,
             name: "max",
