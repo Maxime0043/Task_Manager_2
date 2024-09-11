@@ -102,3 +102,27 @@ export async function listAll(req: Request, res: Response) {
 
   return res.status(200).json({ tasks });
 }
+
+export async function details(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the taskScheduled
+  const taskScheduled = await TaskScheduled.findByPk(id);
+
+  if (!taskScheduled) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Task not found",
+    });
+  }
+
+  return res.status(200).json({ taskScheduled });
+}
