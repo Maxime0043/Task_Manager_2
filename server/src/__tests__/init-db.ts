@@ -166,12 +166,12 @@ export async function populateTasks(creatorId: string, projectId: string) {
 
   for (let i = 1; i <= 20; i++) {
     tasks.push({
-      name: "Task 1",
+      name: `Task ${i}`,
       timeEstimate: "16.00",
       deadline: "2024-09-12 09:30:00",
       percentDone: 0,
       statusId: 1,
-      description: "Task 1 description",
+      description: `Description of the task ${i}`,
       priority: "high",
       position: 1,
       projectId,
