@@ -8,6 +8,7 @@ import SequelizeError from "../errors/SequelizeError";
 import Task, { TASK_PRIORITIES } from "../db/models/task";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 import User from "../db/models/user";
+import TaskUsers from "../db/models/task_users";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -138,6 +139,10 @@ export async function create(req: Request, res: Response) {
     position: Joi.number().integer().min(0),
     projectId: Joi.string().uuid({ version: "uuidv4" }).required(),
     creatorId: Joi.string().uuid({ version: "uuidv4" }).required(),
+    usersAssigned: Joi.array()
+      .items(Joi.string().uuid({ version: "uuidv4" }))
+      .min(1)
+      .required(),
   });
 
   // Validate the payload
@@ -147,13 +152,31 @@ export async function create(req: Request, res: Response) {
     throw new JoiError({ error });
   }
 
+  // Format the users assigned to the task
+  const usersAssigned = value.usersAssigned;
+  delete value.usersAssigned;
+
   // Continue with the task creation process
   try {
     // Create a new task
-    const task = await Task.create(value);
+    var task = await Task.create(value);
+
+    // Create the association between the task and the users assigned
+    for (const userId of usersAssigned) {
+      await TaskUsers.create({
+        taskId: task.id,
+        userId,
+      });
+    }
+
+    // Reload the task with the users assigned
+    task = await task.reload({
+      include: { model: User, as: "usersAssigned" },
+    });
 
     return res.status(201).json({ task });
   } catch (err) {
+    console.error(err);
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
     }
