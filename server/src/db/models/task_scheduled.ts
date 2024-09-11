@@ -17,12 +17,12 @@ import Task from "./task";
 })
 class TaskScheduled extends Model {
   @Column({
-    type: DataType.INTEGER,
-    autoIncrement: true,
+    type: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
     allowNull: false,
     primaryKey: true,
   })
-  id!: number;
+  id!: string;
 
   @Column({ type: DataType.DATEONLY, allowNull: false })
   date!: Date;
