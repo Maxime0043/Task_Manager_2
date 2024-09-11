@@ -90,8 +90,8 @@ export async function listAll(req: Request, res: Response) {
     where.userId = { [Op.eq]: userId };
   }
 
-  // Find the tasks
-  const tasks = await TaskScheduled.findAll({
+  // Find the taskScheduled
+  const taskScheduled = await TaskScheduled.findAll({
     where,
     limit: limit ? parseInt(limit as string) : undefined,
     offset: offset ? parseInt(offset as string) : undefined,
@@ -101,7 +101,7 @@ export async function listAll(req: Request, res: Response) {
         : undefined,
   });
 
-  return res.status(200).json({ tasks });
+  return res.status(200).json({ taskScheduled });
 }
 
 export async function details(req: Request, res: Response) {
