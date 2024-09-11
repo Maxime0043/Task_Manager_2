@@ -157,32 +157,60 @@ export async function create(req: Request, res: Response) {
   delete value.usersAssigned;
 
   // Continue with the task creation process
+  let task: Task;
+  const transaction = await Task.sequelize?.transaction();
+
   try {
     // Create a new task
-    var task = await Task.create(value);
-
-    // Create the association between the task and the users assigned
-    for (const userId of usersAssigned) {
-      await TaskUsers.create({
-        taskId: task.id,
-        userId,
-      });
-    }
-
-    // Reload the task with the users assigned
-    task = await task.reload({
-      include: { model: User, as: "usersAssigned" },
-    });
-
-    return res.status(201).json({ task });
+    task = await Task.create(value, { transaction });
   } catch (err) {
-    console.error(err);
+    // Rollback the transaction in case of error
+    await transaction?.rollback();
+
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
     }
 
     throw err;
   }
+
+  let i = 0;
+
+  // Create the association between the task and the users assigned
+  try {
+    for (; i < usersAssigned.length; i++) {
+      await TaskUsers.create(
+        {
+          taskId: task.id,
+          userId: usersAssigned[i],
+        },
+        { transaction }
+      );
+    }
+  } catch (err) {
+    // Rollback the transaction in case of error
+    await transaction?.rollback();
+
+    if (err instanceof BaseError) {
+      throw new SequelizeError({
+        statusCode: 409,
+        error: err,
+        extra: { foreignKeyField: `usersAssigned[${i}]` },
+      });
+    }
+
+    throw err;
+  }
+
+  // Commit the transaction
+  await transaction?.commit();
+
+  // Reload the task with the users assigned
+  task = await task.reload({
+    include: { model: User, as: "usersAssigned" },
+  });
+
+  return res.status(201).json({ task });
 }
 
 export async function update(req: Request, res: Response) {
