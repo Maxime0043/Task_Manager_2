@@ -8,7 +8,6 @@ import SequelizeError from "../errors/SequelizeError";
 import TaskScheduled from "../db/models/task_scheduled";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 import { isIsoDate } from "../utils/validate";
-import { start } from "repl";
 
 export async function listAll(req: Request, res: Response) {
   const { start, end, taskId, projectId, userId, limit, offset, orderBy, dir } =
