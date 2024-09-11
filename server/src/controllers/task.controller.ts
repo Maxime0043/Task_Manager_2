@@ -7,6 +7,7 @@ import SimpleError from "../errors/SimpleError";
 import SequelizeError from "../errors/SequelizeError";
 import Task, { TASK_PRIORITIES } from "../db/models/task";
 import { verifyIdIsUUID } from "../utils/joi_utils";
+import User from "../db/models/user";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -78,6 +79,13 @@ export async function listAll(req: Request, res: Response) {
       orderBy && dir
         ? [[orderBy as string, dir === "asc" ? "ASC" : "DESC"]]
         : undefined,
+    include: [
+      {
+        model: User,
+        as: "usersAssigned",
+        attributes: ["id", "firstname", "lastname", "icon"],
+      },
+    ],
   });
 
   return res.status(200).json({ tasks });
