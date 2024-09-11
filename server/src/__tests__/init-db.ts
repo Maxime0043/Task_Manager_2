@@ -4,6 +4,7 @@ import TaskStatus from "../db/models/task_status";
 import Client from "../db/models/client";
 import Project from "../db/models/project";
 import Task from "../db/models/task";
+import TaskScheduled from "../db/models/task_scheduled";
 
 export default async function initDB() {
   // Create the UserRoles
@@ -182,4 +183,24 @@ export async function populateTasks(creatorId: string, projectId: string) {
   }
 
   await Task.bulkCreate(tasks);
+}
+
+export async function populateTaskScheduled(userId: string, projectId: string) {
+  // Create the taskScheduled
+  const taskScheduled: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    taskScheduled.push({
+      date: `2024-09-${("00" + i).slice(-2)}`,
+      start: "08:00:00",
+      end: "12:00:00",
+      taskId: null,
+      projectId,
+      userId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await TaskScheduled.bulkCreate(taskScheduled);
 }
