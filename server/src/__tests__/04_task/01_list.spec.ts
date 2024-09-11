@@ -151,8 +151,6 @@ describe(`GET ${url}`, () => {
       .set("Cookie", cookie)
       .query({ orderBy: "name", dir: "desc", limit: 1 });
 
-    console.log(JSON.stringify(res.body, null, 2));
-
     expect(res.status).toBe(200);
     expect(res.body.tasks[0].name).toBe("Task 9");
   });
