@@ -130,6 +130,13 @@ export default class JoiError extends Error {
             value: "date",
           });
           break;
+        case "date.format":
+          list.push({
+            [name]: err.context?.key,
+            name: "type",
+            value: `date.${err.context?.format}`,
+          });
+          break;
         default:
           list.push({
             [name]: err.context?.key,
