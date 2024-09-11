@@ -80,6 +80,7 @@ export default class JoiError extends Error {
           });
           break;
         case "string.min":
+        case "number.min":
           list.push({
             [name]: err.context?.key,
             name: "min",
@@ -87,6 +88,7 @@ export default class JoiError extends Error {
           });
           break;
         case "string.max":
+        case "number.max":
           list.push({
             [name]: err.context?.key,
             name: "max",
@@ -119,6 +121,20 @@ export default class JoiError extends Error {
             [name]: err.context?.key,
             name: "type",
             value: "boolean",
+          });
+          break;
+        case "date.base":
+          list.push({
+            [name]: err.context?.key,
+            name: "type",
+            value: "date",
+          });
+          break;
+        case "date.format":
+          list.push({
+            [name]: err.context?.key,
+            name: "type",
+            value: `date.${err.context?.format}`,
           });
           break;
         default:

@@ -3,6 +3,7 @@ import ProjectStatus from "../db/models/project_status";
 import TaskStatus from "../db/models/task_status";
 import Client from "../db/models/client";
 import Project from "../db/models/project";
+import Task from "../db/models/task";
 
 export default async function initDB() {
   // Create the UserRoles
@@ -157,4 +158,28 @@ export async function populateProjects(creatorId: string, clientId: string) {
   }
 
   await Project.bulkCreate(projects);
+}
+
+export async function populateTasks(creatorId: string, projectId: string) {
+  // Create the tasks
+  const tasks: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    tasks.push({
+      name: `Task ${i}`,
+      timeEstimate: "16.00",
+      deadline: "2024-09-12 09:30:00",
+      percentDone: 0,
+      statusId: 1,
+      description: `Description of the task ${i}`,
+      priority: "high",
+      position: 1,
+      projectId,
+      creatorId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await Task.bulkCreate(tasks);
 }
