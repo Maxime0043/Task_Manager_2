@@ -8,6 +8,7 @@ import SequelizeError from "../errors/SequelizeError";
 import TaskScheduled from "../db/models/task_scheduled";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 import { isIsoDate } from "../utils/validate";
+import { start } from "repl";
 
 export async function listAll(req: Request, res: Response) {
   const { start, end, taskId, projectId, userId, limit, offset, orderBy, dir } =
@@ -125,4 +126,49 @@ export async function details(req: Request, res: Response) {
   }
 
   return res.status(200).json({ taskScheduled });
+}
+
+export async function create(req: Request, res: Response) {
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    date: Joi.string()
+      .regex(/^\d{4}-\d{2}-\d{2}$/)
+      .required(),
+    start: Joi.string()
+      .regex(/^\d{2}:\d{2}:\d{2}$/)
+      .required(),
+    end: Joi.string()
+      .regex(/^\d{2}:\d{2}:\d{2}$/)
+      .required(),
+    taskId: Joi.string().uuid({ version: "uuidv4" }),
+    projectId: Joi.string().uuid({ version: "uuidv4" }).when("taskId", {
+      is: Joi.exist(),
+      then: Joi.forbidden(),
+      otherwise: Joi.required(),
+    }),
+    userId: Joi.string().uuid({ version: "uuidv4" }).required(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Continue with the taskScheduled creation process
+  try {
+    // Create a new taskScheduled
+    const taskScheduled = await TaskScheduled.create(value);
+
+    return res.status(201).json({ taskScheduled });
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
 }

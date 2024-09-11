@@ -54,6 +54,7 @@ export default class JoiError extends Error {
               : err.context?.valids,
           });
           break;
+        case "any.unknown":
         case "object.unknown":
           list.push({
             [name]: err.context?.key,
