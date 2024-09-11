@@ -266,42 +266,71 @@ export async function update(req: Request, res: Response) {
   delete value.usersAssigned;
 
   // Continue with the task update process
+  let updatedTask: Task;
+  const transaction = await Task.sequelize?.transaction();
+
   try {
     // Update the task
-    var updatedTask = await task.update(value);
-
-    // Update the users assigned to the task
-    if (usersAssigned) {
-      // Remove the users that are not assigned anymore
-      await TaskUsers.destroy({
-        where: {
-          taskId: updatedTask.id,
-          userId: { [Op.notIn]: usersAssigned },
-        },
-      });
-
-      // Add the new users assigned
-      for (const userId of usersAssigned) {
-        await TaskUsers.findOrCreate({
-          where: { taskId: updatedTask.id, userId },
-          defaults: { taskId: updatedTask.id, userId },
-        });
-      }
-    }
-
-    // Reload the task with the users assigned
-    updatedTask = await updatedTask.reload({
-      include: { model: User, as: "usersAssigned" },
-    });
-
-    return res.status(200).json({ task: updatedTask });
+    updatedTask = await task.update(value);
   } catch (err) {
+    // Rollback the transaction in case of error
+    await transaction?.rollback();
+
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
     }
 
     throw err;
   }
+
+  // Update the users assigned to the task
+  if (usersAssigned) {
+    let i = 0;
+
+    // Create the association between the task and the users assigned
+    try {
+      // Remove the users that are not assigned anymore
+      await TaskUsers.destroy({
+        where: {
+          taskId: updatedTask.id,
+          userId: { [Op.notIn]: usersAssigned },
+        },
+        transaction,
+      });
+
+      // Add the new users assigned
+      for (; i < usersAssigned.length; i++) {
+        await TaskUsers.findOrCreate({
+          where: { taskId: updatedTask.id, userId: usersAssigned[i] },
+          defaults: { taskId: updatedTask.id, userId: usersAssigned[i] },
+          transaction,
+        });
+      }
+    } catch (err) {
+      // Rollback the transaction in case of error
+      await transaction?.rollback();
+
+      if (err instanceof BaseError) {
+        throw new SequelizeError({
+          statusCode: 409,
+          error: err,
+          extra: { foreignKeyField: `usersAssigned[${i}]` },
+        });
+      }
+
+      throw err;
+    }
+  }
+
+  // Commit the transaction
+  await transaction?.commit();
+
+  // Reload the task with the users assigned
+  updatedTask = await updatedTask.reload({
+    include: { model: User, as: "usersAssigned" },
+  });
+
+  return res.status(200).json({ task: updatedTask });
 }
 
 export async function remove(req: Request, res: Response) {
