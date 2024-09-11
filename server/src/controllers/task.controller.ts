@@ -241,3 +241,39 @@ export async function remove(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function restore(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the task to restore
+  const task = await Task.findByPk(id, { paranoid: false });
+
+  if (!task) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Task not found",
+    });
+  }
+
+  // Continue with the task restoration process
+  try {
+    // Restore the task
+    await task.restore();
+
+    return res.sendStatus(200);
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
