@@ -98,10 +98,10 @@ export async function create(req: Request, res: Response) {
 
   // Continue with the UserRole creation process
   try {
-    // Create a new UserRole
-    const UserRole = await UserRoles.create(value);
+    // Create a new userRole
+    const userRole = await UserRoles.create(value);
 
-    return res.status(201).json({ UserRole });
+    return res.status(201).json({ userRole });
   } catch (err) {
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
