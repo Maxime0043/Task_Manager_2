@@ -109,3 +109,54 @@ export async function create(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function update(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsInteger(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the userRole to update
+  const userRole = await UserRoles.findByPk(id);
+
+  if (!userRole) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "UserRole not found",
+    });
+  }
+
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    name: Joi.string().trim().max(255),
+    label: Joi.string().trim().max(255),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Continue with the userRole update process
+  try {
+    // Update the userRole
+    const updatedClient = await userRole.update(value);
+
+    return res.status(200).json({ userRole: updatedClient });
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
