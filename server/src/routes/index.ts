@@ -3,7 +3,11 @@ import express from "express";
 const router = express.Router();
 
 // Import Middlewares
-import { auth, authRequired } from "../middlewares/auth.middleware";
+import {
+  adminRequired,
+  auth,
+  authRequired,
+} from "../middlewares/auth.middleware";
 
 // Import Routes
 import authRoutes from "./auth.route";
@@ -18,7 +22,7 @@ router.use("/clients", [auth, authRequired], clientRoutes);
 router.use("/projects", [auth, authRequired], projectRoutes);
 router.use("/tasks", [auth, authRequired], taskRoutes);
 
-router.use("/admin", [auth, authRequired], adminRoutes);
+router.use("/admin", [auth, authRequired, adminRequired], adminRoutes);
 
 // Export the router
 export default router;
