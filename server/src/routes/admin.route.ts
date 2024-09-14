@@ -18,7 +18,11 @@ import {
   restore as restoreUser,
   updateOther as updateUser,
 } from "../controllers/user.controller";
-import { listAll as listAllProjectStatus } from "../controllers/project_status.controller";
+import {
+  create as createProjectStatus,
+  details as detailsProjectStatus,
+  listAll as listAllProjectStatus,
+} from "../controllers/project_status.controller";
 
 // Import routes
 
@@ -35,6 +39,8 @@ router.delete("/users/:id", removeUser);
 router.post("/users/restore/:id", restoreUser);
 
 router.get("/project_status", listAllProjectStatus);
+router.get("/project_status/:id", detailsProjectStatus);
+router.post("/project_status", createProjectStatus);
 
 // Export the router
 export default router;

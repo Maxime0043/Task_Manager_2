@@ -54,3 +54,62 @@ export async function listAll(req: Request, res: Response) {
 
   return res.status(200).json({ projectStatus });
 }
+
+export async function details(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsInteger(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the projectStatus
+  const projectStatus = await ProjectStatus.findByPk(id);
+
+  if (!projectStatus) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "UserRole not found",
+    });
+  }
+
+  return res.status(200).json({ projectStatus });
+}
+
+export async function create(req: Request, res: Response) {
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    name: Joi.string().trim().max(255).required(),
+    label: Joi.string().trim().max(255).required(),
+    color: Joi.string()
+      .trim()
+      .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/)
+      .required(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Continue with the ProjectStatus creation process
+  try {
+    // Create a new projectStatus
+    const projectStatus = await ProjectStatus.create(value);
+
+    return res.status(201).json({ projectStatus });
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
