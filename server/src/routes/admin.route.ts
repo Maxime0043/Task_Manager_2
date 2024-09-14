@@ -29,6 +29,7 @@ import {
   create as createTaskStatus,
   details as detailsTaskStatus,
   listAll as listAllTaskStatus,
+  update as updateTaskStatus,
 } from "../controllers/task_status.controller";
 
 // Import routes
@@ -54,6 +55,7 @@ router.delete("/project_status/:id", removeProjectStatus);
 router.get("/task_status", listAllTaskStatus);
 router.get("/task_status/:id", detailsTaskStatus);
 router.post("/task_status", createTaskStatus);
+router.put("/task_status/:id", updateTaskStatus);
 
 // Export the router
 export default router;
