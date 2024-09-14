@@ -7,6 +7,7 @@ const router = express.Router();
 // Import Controllers
 import {
   create as createUser,
+  remove as removeUser,
   updateOther as updateUser,
 } from "../controllers/user.controller";
 
@@ -15,6 +16,7 @@ import {
 // Define the API routes
 router.post("/users", createUser);
 router.put("/users/:id", updateUser);
+router.delete("/users/:id", removeUser);
 
 // Export the router
 export default router;
