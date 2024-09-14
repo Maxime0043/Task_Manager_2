@@ -113,3 +113,57 @@ export async function create(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function update(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsInteger(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the projectStatus to update
+  const projectStatus = await ProjectStatus.findByPk(id);
+
+  if (!projectStatus) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "ProjectStatus not found",
+    });
+  }
+
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    name: Joi.string().trim().max(255),
+    label: Joi.string().trim().max(255),
+    color: Joi.string()
+      .trim()
+      .regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Continue with the projectStatus update process
+  try {
+    // Update the projectStatus
+    const updatedProjectStatus = await projectStatus.update(value);
+
+    return res.status(200).json({ projectStatus: updatedProjectStatus });
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
