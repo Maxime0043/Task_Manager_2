@@ -9,8 +9,8 @@ import {
   create as createRole,
   details as detailsUserRole,
   listAll as listAllUserRoles,
-  remove as removeRole,
-  update as updateRole,
+  remove as removeUserRole,
+  update as updateUserRole,
 } from "../controllers/user_role.controller";
 import {
   create as createUser,
@@ -18,6 +18,7 @@ import {
   restore as restoreUser,
   updateOther as updateUser,
 } from "../controllers/user.controller";
+import { listAll as listAllProjectStatus } from "../controllers/project_status.controller";
 
 // Import routes
 
@@ -25,13 +26,15 @@ import {
 router.get("/user_roles", listAllUserRoles);
 router.get("/user_roles/:id", detailsUserRole);
 router.post("/user_roles", createRole);
-router.put("/user_roles/:id", updateRole);
-router.delete("/user_roles/:id", removeRole);
+router.put("/user_roles/:id", updateUserRole);
+router.delete("/user_roles/:id", removeUserRole);
 
 router.post("/users", createUser);
 router.put("/users/:id", updateUser);
 router.delete("/users/:id", removeUser);
 router.post("/users/restore/:id", restoreUser);
+
+router.get("/project_status", listAllProjectStatus);
 
 // Export the router
 export default router;
