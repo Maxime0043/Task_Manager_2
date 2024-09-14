@@ -8,6 +8,7 @@ const router = express.Router();
 import {
   create as createUser,
   remove as removeUser,
+  restore as restoreUser,
   updateOther as updateUser,
 } from "../controllers/user.controller";
 
@@ -17,6 +18,7 @@ import {
 router.post("/users", createUser);
 router.put("/users/:id", updateUser);
 router.delete("/users/:id", removeUser);
+router.post("/users/restore/:id", restoreUser);
 
 // Export the router
 export default router;

@@ -151,3 +151,39 @@ export async function remove(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function restore(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the user to restore
+  const user = await User.findByPk(id, { paranoid: false });
+
+  if (!user) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "User not found",
+    });
+  }
+
+  // Continue with the user restoration process
+  try {
+    // Restore the user
+    await user.restore();
+
+    return res.sendStatus(200);
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
