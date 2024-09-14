@@ -7,6 +7,7 @@ import SimpleError from "../errors/SimpleError";
 import JoiError from "../errors/JoiError";
 import SequelizeError from "../errors/SequelizeError";
 import { verifyIdIsInteger } from "../utils/joi_utils";
+import User from "../db/models/user";
 
 export async function listAll(req: Request, res: Response) {
   const { label, limit, offset, orderBy, dir } = req.query;
@@ -153,6 +154,82 @@ export async function update(req: Request, res: Response) {
 
     return res.status(200).json({ userRole: updatedClient });
   } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
+
+export async function remove(req: Request, res: Response) {
+  const { id } = req.params;
+  const payload = req.body;
+
+  // Validate the params
+  const errorParams = verifyIdIsInteger(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    roleId: Joi.number().integer().min(1).required(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  const { roleId } = value;
+  const transaction = await UserRoles.sequelize?.transaction();
+
+  // Find the UserRole to delete
+  const userRole = await UserRoles.findByPk(id);
+
+  if (!userRole) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "UserRole not found",
+    });
+  }
+
+  // Find all the users with the roleId and change their roleId
+  try {
+    // Update the users
+    await User.update(
+      { roleId: roleId },
+      { where: { roleId: userRole.id }, transaction }
+    );
+  } catch (err) {
+    // Rollback the transaction in case of error
+    await transaction?.rollback();
+
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+
+  // Continue with the UserRole removal process
+  try {
+    // Remove the UserRole
+    await userRole.destroy({ transaction });
+
+    // Commit the transaction
+    await transaction?.commit();
+
+    return res.sendStatus(200);
+  } catch (err) {
+    // Rollback the transaction in case of error
+    await transaction?.rollback();
+
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
     }

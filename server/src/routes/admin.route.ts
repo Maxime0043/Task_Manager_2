@@ -9,6 +9,7 @@ import {
   create as createRole,
   details as detailsUserRole,
   listAll as listAllUserRoles,
+  remove as removeRole,
   update as updateRole,
 } from "../controllers/user_role.controller";
 import {
@@ -25,6 +26,7 @@ router.get("/user_roles", listAllUserRoles);
 router.get("/user_roles/:id", detailsUserRole);
 router.post("/user_roles", createRole);
 router.put("/user_roles/:id", updateRole);
+router.delete("/user_roles/:id", removeRole);
 
 router.post("/users", createUser);
 router.put("/users/:id", updateUser);
