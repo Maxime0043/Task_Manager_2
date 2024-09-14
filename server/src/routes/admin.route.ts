@@ -25,7 +25,10 @@ import {
   remove as removeProjectStatus,
   update as updateProjectStatus,
 } from "../controllers/project_status.controller";
-import { listAll as listAllTaskStatus } from "../controllers/task_status.controller";
+import {
+  details as detailsTaskStatus,
+  listAll as listAllTaskStatus,
+} from "../controllers/task_status.controller";
 
 // Import routes
 
@@ -48,6 +51,7 @@ router.put("/project_status/:id", updateProjectStatus);
 router.delete("/project_status/:id", removeProjectStatus);
 
 router.get("/task_status", listAllTaskStatus);
+router.get("/task_status/:id", detailsTaskStatus);
 
 // Export the router
 export default router;

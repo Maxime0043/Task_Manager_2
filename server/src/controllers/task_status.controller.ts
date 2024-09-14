@@ -55,3 +55,27 @@ export async function listAll(req: Request, res: Response) {
 
   return res.status(200).json({ taskStatus });
 }
+
+export async function details(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsInteger(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the taskStatus
+  const taskStatus = await TaskStatus.findByPk(id);
+
+  if (!taskStatus) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "UserRole not found",
+    });
+  }
+
+  return res.status(200).json({ taskStatus });
+}
