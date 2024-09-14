@@ -25,6 +25,7 @@ import {
   remove as removeProjectStatus,
   update as updateProjectStatus,
 } from "../controllers/project_status.controller";
+import { listAll as listAllTaskStatus } from "../controllers/task_status.controller";
 
 // Import routes
 
@@ -45,6 +46,8 @@ router.get("/project_status/:id", detailsProjectStatus);
 router.post("/project_status", createProjectStatus);
 router.put("/project_status/:id", updateProjectStatus);
 router.delete("/project_status/:id", removeProjectStatus);
+
+router.get("/task_status", listAllTaskStatus);
 
 // Export the router
 export default router;
