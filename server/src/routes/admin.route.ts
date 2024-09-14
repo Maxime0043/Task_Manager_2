@@ -22,6 +22,7 @@ import {
   create as createProjectStatus,
   details as detailsProjectStatus,
   listAll as listAllProjectStatus,
+  remove as removeProjectStatus,
   update as updateProjectStatus,
 } from "../controllers/project_status.controller";
 
@@ -43,6 +44,7 @@ router.get("/project_status", listAllProjectStatus);
 router.get("/project_status/:id", detailsProjectStatus);
 router.post("/project_status", createProjectStatus);
 router.put("/project_status/:id", updateProjectStatus);
+router.delete("/project_status/:id", removeProjectStatus);
 
 // Export the router
 export default router;
