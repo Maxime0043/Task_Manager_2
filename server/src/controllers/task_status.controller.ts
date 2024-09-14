@@ -168,3 +168,79 @@ export async function update(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function remove(req: Request, res: Response) {
+  const { id } = req.params;
+  const payload = req.body;
+
+  // Validate the params
+  const errorParams = verifyIdIsInteger(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    statusId: Joi.number().integer().min(1).required(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  const { statusId } = value;
+  const transaction = await TaskStatus.sequelize?.transaction();
+
+  // Find the TaskStatus to delete
+  const taskStatus = await TaskStatus.findByPk(id);
+
+  if (!taskStatus) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "TaskStatus not found",
+    });
+  }
+
+  // Find all the tasks with the statusId and change their statusId
+  try {
+    // Update the tasks
+    await Task.update(
+      { statusId: statusId },
+      { where: { statusId: taskStatus.id }, transaction }
+    );
+  } catch (err) {
+    // Rollback the transaction in case of error
+    await transaction?.rollback();
+
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+
+  // Continue with the UserRole removal process
+  try {
+    // Remove the UserRole
+    await taskStatus.destroy({ transaction });
+
+    // Commit the transaction
+    await transaction?.commit();
+
+    return res.sendStatus(200);
+  } catch (err) {
+    // Rollback the transaction in case of error
+    await transaction?.rollback();
+
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
