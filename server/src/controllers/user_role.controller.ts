@@ -78,3 +78,34 @@ export async function details(req: Request, res: Response) {
 
   return res.status(200).json({ userRole });
 }
+
+export async function create(req: Request, res: Response) {
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    name: Joi.string().trim().max(255).required(),
+    label: Joi.string().trim().max(255).required(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Continue with the UserRole creation process
+  try {
+    // Create a new UserRole
+    const UserRole = await UserRoles.create(value);
+
+    return res.status(201).json({ UserRole });
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}

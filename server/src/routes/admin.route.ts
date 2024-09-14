@@ -6,6 +6,7 @@ const router = express.Router();
 
 // Import Controllers
 import {
+  create as createRole,
   details as detailsUserRole,
   listAll as listAllUserRoles,
 } from "../controllers/user_role.controller";
@@ -21,6 +22,7 @@ import {
 // Define the API routes
 router.get("/user_roles", listAllUserRoles);
 router.get("/user_roles/:id", detailsUserRole);
+router.post("/user_roles", createRole);
 
 router.post("/users", createUser);
 router.put("/users/:id", updateUser);
