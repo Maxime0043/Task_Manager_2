@@ -6,6 +6,7 @@ import UserRoles from "../db/models/user_role";
 import SimpleError from "../errors/SimpleError";
 import JoiError from "../errors/JoiError";
 import SequelizeError from "../errors/SequelizeError";
+import { verifyIdIsInteger } from "../utils/joi_utils";
 
 export async function listAll(req: Request, res: Response) {
   const { label, limit, offset, orderBy, dir } = req.query;
@@ -52,4 +53,28 @@ export async function listAll(req: Request, res: Response) {
   });
 
   return res.status(200).json({ userRoles });
+}
+
+export async function details(req: Request, res: Response) {
+  const { id } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsInteger(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Find the userRole
+  const userRole = await UserRoles.findByPk(id);
+
+  if (!userRole) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "UserRole not found",
+    });
+  }
+
+  return res.status(200).json({ userRole });
 }
