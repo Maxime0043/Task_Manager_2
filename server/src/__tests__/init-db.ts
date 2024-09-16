@@ -5,6 +5,7 @@ import Client from "../db/models/client";
 import Project from "../db/models/project";
 import Task from "../db/models/task";
 import TaskScheduled from "../db/models/task_scheduled";
+import User from "../db/models/user";
 
 export default async function initDB() {
   // Create the UserRoles
@@ -169,6 +170,24 @@ export async function populateTaskStatus() {
   }
 
   await TaskStatus.bulkCreate(taskStatus);
+}
+
+export async function populateUsers() {
+  // Create the users
+  const users: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    users.push({
+      lastName: `Doe ${i}`,
+      firstName: `John ${i}`,
+      email: `john.doe${i}@example.com`,
+      password: "password",
+      passwordConfirmation: "password",
+      roleId: 1,
+    });
+  }
+
+  await User.bulkCreate(users);
 }
 
 export async function populateClients(creatorId: string) {
