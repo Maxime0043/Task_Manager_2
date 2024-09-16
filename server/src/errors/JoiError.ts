@@ -150,6 +150,13 @@ export default class JoiError extends Error {
             value: "array",
           });
           break;
+        case "string.uri":
+          list.push({
+            [name]: err.context?.key,
+            name: "type",
+            value: "uri",
+          });
+          break;
         default:
           list.push({
             [name]: err.context?.key,
