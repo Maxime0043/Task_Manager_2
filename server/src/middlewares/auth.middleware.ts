@@ -45,7 +45,7 @@ export async function adminRequired(
     if (user && user.isAdmin) {
       next();
     } else {
-      return res.sendStatus(401);
+      return res.sendStatus(403);
     }
   } else {
     return res.sendStatus(401);

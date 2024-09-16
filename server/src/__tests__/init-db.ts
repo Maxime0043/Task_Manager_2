@@ -121,6 +121,56 @@ export default async function initDB() {
   ]);
 }
 
+export async function populateUserRoles() {
+  // Create the userRoles
+  const userRoles: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    userRoles.push({
+      name: `role ${i}`,
+      label: `Role ${i}`,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await UserRoles.bulkCreate(userRoles);
+}
+
+export async function populateProjectStatus() {
+  // Create the projectStatus
+  const projectStatus: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    projectStatus.push({
+      name: `status ${i}`,
+      label: `Status ${i}`,
+      color: "#FF0000",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await ProjectStatus.bulkCreate(projectStatus);
+}
+
+export async function populateTaskStatus() {
+  // Create the taskStatus
+  const taskStatus: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    taskStatus.push({
+      name: `status ${i}`,
+      label: `Status ${i}`,
+      color: "#FF0000",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await TaskStatus.bulkCreate(taskStatus);
+}
+
 export async function populateClients(creatorId: string) {
   // Create the clients
   const clients: any = [];
