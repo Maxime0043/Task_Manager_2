@@ -137,6 +137,23 @@ export async function populateUserRoles() {
   await UserRoles.bulkCreate(userRoles);
 }
 
+export async function populateProjectStatus() {
+  // Create the projectStatus
+  const projectStatus: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    projectStatus.push({
+      name: `status ${i}`,
+      label: `Status ${i}`,
+      color: "#FF0000",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await ProjectStatus.bulkCreate(projectStatus);
+}
+
 export async function populateClients(creatorId: string) {
   // Create the clients
   const clients: any = [];
