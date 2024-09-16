@@ -7,6 +7,80 @@ import SimpleError from "../errors/SimpleError";
 import JoiError from "../errors/JoiError";
 import SequelizeError from "../errors/SequelizeError";
 import { verifyIdIsUUID } from "../utils/joi_utils";
+import { Op } from "sequelize";
+
+export async function listAll(req: Request, res: Response) {
+  const {
+    lastName,
+    firstName,
+    email,
+    isAdmin,
+    deleted,
+    limit,
+    offset,
+    orderBy,
+    dir,
+  } = req.query;
+
+  // Retrieve the Users columns
+  const userColumns = Object.keys(User.getAttributes()).map((column) =>
+    column.toLowerCase()
+  );
+
+  // Create JOI Schema to validate the query params
+  const schema = Joi.object({
+    lastName: Joi.string().trim().max(255),
+    firstName: Joi.string().trim().max(255),
+    email: Joi.string().trim().max(255),
+    isAdmin: Joi.string().lowercase().valid("true", "false"),
+    deleted: Joi.string().lowercase().valid("true", "false"),
+    limit: Joi.number().integer().min(1).required(),
+    offset: Joi.number().integer().min(0),
+    orderBy: Joi.string()
+      .lowercase()
+      .valid(...userColumns),
+    dir: Joi.string().lowercase().valid("asc", "desc"),
+  });
+
+  // Validate the query params
+  const { error: errorParams } = schema.validate(req.query, {
+    abortEarly: false,
+  });
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Create the where object
+  const where: any = {};
+
+  if (lastName) {
+    where.lastName = { [Op.like]: `%${lastName}%` };
+  }
+  if (firstName) {
+    where.firstName = { [Op.like]: `%${firstName}%` };
+  }
+  if (email) {
+    where.email = { [Op.like]: `%${email}%` };
+  }
+  if (isAdmin) {
+    where.isAdmin = isAdmin === "true";
+  }
+
+  // Find the users
+  const users = await User.findAll({
+    paranoid: deleted === "true" ? false : undefined,
+    where,
+    limit: parseInt(limit as string),
+    offset: offset ? parseInt(offset as string) : undefined,
+    order:
+      orderBy && dir
+        ? [[orderBy as string, dir === "asc" ? "ASC" : "DESC"]]
+        : undefined,
+  });
+
+  return res.status(200).json({ users });
+}
 
 export async function create(req: Request, res: Response) {
   const payload = req.body;
