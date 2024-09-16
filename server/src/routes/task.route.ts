@@ -16,9 +16,11 @@ import {
 
 // Import routes
 import taskScheduledRoutes from "./task_scheduled.route";
+import statusRoutes from "./task_status.route";
 
 // Define the API routes
 router.use("/scheduled", taskScheduledRoutes);
+router.use("/status", statusRoutes);
 
 router.get("/", listAll);
 router.get("/:id", details);
