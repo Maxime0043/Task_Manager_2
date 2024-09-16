@@ -82,6 +82,23 @@ export async function listAll(req: Request, res: Response) {
   return res.status(200).json({ users });
 }
 
+export async function info(req: Request, res: Response) {
+  const id = res.locals.userId;
+
+  // Find the user
+  const user = await User.findByPk(id);
+
+  if (!user) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "User not found",
+    });
+  }
+
+  return res.status(200).json({ user });
+}
+
 export async function create(req: Request, res: Response) {
   const payload = req.body;
 
