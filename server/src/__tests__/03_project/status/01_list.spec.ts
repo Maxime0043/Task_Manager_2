@@ -7,7 +7,7 @@ import db from "../../../db/models/index";
 import initDB, { populateProjectStatus } from "../../init-db";
 import User from "../../../db/models/user";
 
-const url = "/api/v1/admin/project_status";
+const url = "/api/v1/projects/status";
 
 var user: User;
 var cookie: string;
@@ -30,7 +30,6 @@ describe(`GET ${url}`, () => {
       email: "john.doe@example.com",
       password: "password",
       passwordConfirmation: "password",
-      isAdmin: true,
       roleId: 1,
     });
 
@@ -53,19 +52,6 @@ describe(`GET ${url}`, () => {
     const res = await supertest(app).get(url);
 
     expect(res.status).toBe(401);
-  });
-
-  it("should return 403 if the user is not an admin", async () => {
-    // Update the user to remove the admin role
-    await user.update({ isAdmin: false });
-
-    // Request
-    const res = await supertest(app).get(url).set("Cookie", cookie);
-
-    expect(res.status).toBe(403);
-
-    // Restore the user to admin
-    await user.update({ isAdmin: true });
   });
 
   it.each([
