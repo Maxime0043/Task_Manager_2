@@ -154,6 +154,23 @@ export async function populateProjectStatus() {
   await ProjectStatus.bulkCreate(projectStatus);
 }
 
+export async function populateTaskStatus() {
+  // Create the taskStatus
+  const taskStatus: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    taskStatus.push({
+      name: `status ${i}`,
+      label: `Status ${i}`,
+      color: "#FF0000",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await TaskStatus.bulkCreate(taskStatus);
+}
+
 export async function populateClients(creatorId: string) {
   // Create the clients
   const clients: any = [];
