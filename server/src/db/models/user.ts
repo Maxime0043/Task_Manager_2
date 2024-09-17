@@ -69,7 +69,10 @@ class User extends Model {
   @BelongsTo(() => UserRoles)
   userRole!: UserRoles;
 
-  @HasMany(() => Client)
+  @HasMany(() => Client, {
+    onDelete: "SET NULL",
+    onUpdate: "CASCADE",
+  })
   clientsCreated!: Client[];
 
   @HasMany(() => Project, {
