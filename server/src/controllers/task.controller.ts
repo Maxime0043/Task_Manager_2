@@ -181,7 +181,6 @@ export async function create(req: Request, res: Response) {
       }
     }
   } catch (err) {
-    console.log(err);
     // Rollback the transaction in case of error
     await transaction?.rollback();
 
