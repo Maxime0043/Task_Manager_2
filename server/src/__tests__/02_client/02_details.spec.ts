@@ -66,7 +66,7 @@ describe(`GET ${url}/:id`, () => {
 
   it("should return 404 if the client does not exist", async () => {
     const res = await supertest(app)
-      .get(`${url.slice(0, -1)}0`)
+      .get(`${urlWithoutId}/${crypto.randomUUID()}`)
       .set("Cookie", cookie);
 
     expect(res.status).toBe(404);
