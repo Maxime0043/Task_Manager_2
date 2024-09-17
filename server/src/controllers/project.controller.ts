@@ -9,7 +9,6 @@ import Project from "../db/models/project";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 import Task from "../db/models/task";
 import TaskFiles from "../db/models/task_files";
-import { deleteFile } from "../storage";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -247,26 +246,10 @@ export async function remove(req: Request, res: Response) {
 
   // Continue with the project removal process
   const transaction = await Project.sequelize?.transaction();
-  let filesToRemovePaths: string[] = [];
 
   try {
-    if (value.definitely === true) {
-      // Retrieve the files paths to remove
-      filesToRemovePaths = project.tasks.reduce((acc: string[], task) => {
-        const taskFiles = task.files.map((file) => file.path);
-        return [...acc, ...taskFiles];
-      }, []);
-    }
-
     // Remove the project
     await project.destroy({ force: value.definitely === true, transaction });
-
-    // Delete the files from the storage
-    if (value.definitely === true) {
-      for (const path of filesToRemovePaths) {
-        await deleteFile(path);
-      }
-    }
 
     // Commit the transaction
     await transaction?.commit();
