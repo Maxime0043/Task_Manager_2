@@ -19,6 +19,8 @@ module.exports = {
       },
       taskId: {
         allowNull: false,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Tasks",
           key: "id",
@@ -27,6 +29,8 @@ module.exports = {
       },
       userId: {
         allowNull: false,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Users",
           key: "id",

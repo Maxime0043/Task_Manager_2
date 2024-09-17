@@ -13,6 +13,12 @@ module.exports = {
      * }], {});
      */
 
+    // Create bcrypt hash for password "password"
+    const bcrypt = require("bcrypt");
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash("password", salt);
+
     await queryInterface.bulkInsert(
       "Users",
       [
@@ -21,7 +27,7 @@ module.exports = {
           firstName: "John",
           lastName: "Doe",
           email: "john.doe@example.com",
-          password: "password",
+          password: hashedPassword,
           icon: "https://example.com/icon.png",
           roleId: 1,
           isAdmin: false,
@@ -33,7 +39,7 @@ module.exports = {
           firstName: "Jane",
           lastName: "Doe",
           email: "jane.doe@example.com",
-          password: "password",
+          password: hashedPassword,
           icon: "https://example.com/icon.png",
           roleId: 1,
           isAdmin: false,
