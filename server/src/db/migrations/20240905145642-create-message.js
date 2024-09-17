@@ -15,6 +15,8 @@ module.exports = {
       },
       conversationId: {
         allowNull: false,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Conversations",
           key: "id",
@@ -23,6 +25,8 @@ module.exports = {
       },
       userId: {
         allowNull: false,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Users",
           key: "id",

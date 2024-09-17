@@ -13,3 +13,17 @@ export function verifyIdIsUUID(
 
   return error;
 }
+
+export function verifyIdIsInteger(
+  params: object
+): Joi.ValidationError | undefined {
+  // Create JOI Schema to validate the params
+  const schema = Joi.object({
+    id: Joi.number().integer().min(1).required(),
+  });
+
+  // Validate the payload
+  const { error } = schema.validate(params, { abortEarly: false });
+
+  return error;
+}

@@ -31,7 +31,12 @@ class Project extends Model {
   name!: string;
 
   @ForeignKey(() => ProjectStatus)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   statusId!: number;
 
   @Column({ type: DataType.DECIMAL(12, 2), allowNull: true })
@@ -44,15 +49,30 @@ class Project extends Model {
   isInternalProject!: boolean;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   managerId!: string;
 
   @ForeignKey(() => Client)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   clientId!: string;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   creatorId!: string;
 
   /**
@@ -71,10 +91,10 @@ class Project extends Model {
   @BelongsTo(() => User, "creatorId")
   creator!: User;
 
-  @HasMany(() => Task)
+  @HasMany(() => Task, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   tasks!: Task[];
 
-  @HasMany(() => TaskScheduled)
+  @HasMany(() => TaskScheduled, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   taskScheduled!: TaskScheduled[];
 }
 

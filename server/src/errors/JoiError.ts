@@ -54,6 +54,7 @@ export default class JoiError extends Error {
               : err.context?.valids,
           });
           break;
+        case "any.unknown":
         case "object.unknown":
           list.push({
             [name]: err.context?.key,
@@ -80,6 +81,8 @@ export default class JoiError extends Error {
           });
           break;
         case "string.min":
+        case "number.min":
+        case "array.min":
           list.push({
             [name]: err.context?.key,
             name: "min",
@@ -87,6 +90,8 @@ export default class JoiError extends Error {
           });
           break;
         case "string.max":
+        case "number.max":
+        case "array.max":
           list.push({
             [name]: err.context?.key,
             name: "max",
@@ -102,7 +107,10 @@ export default class JoiError extends Error {
           break;
         case "string.guid":
           list.push({
-            [name]: err.context?.key,
+            [name]:
+              typeof err.context?.key === "string"
+                ? err.context?.key
+                : err.context?.label,
             name: "type",
             value: "uuid",
           });
@@ -119,6 +127,34 @@ export default class JoiError extends Error {
             [name]: err.context?.key,
             name: "type",
             value: "boolean",
+          });
+          break;
+        case "date.base":
+          list.push({
+            [name]: err.context?.key,
+            name: "type",
+            value: "date",
+          });
+          break;
+        case "date.format":
+          list.push({
+            [name]: err.context?.key,
+            name: "type",
+            value: `date.${err.context?.format}`,
+          });
+          break;
+        case "array.base":
+          list.push({
+            [name]: err.context?.key,
+            name: "type",
+            value: "array",
+          });
+          break;
+        case "string.uri":
+          list.push({
+            [name]: err.context?.key,
+            name: "type",
+            value: "uri",
           });
           break;
         default:

@@ -9,18 +9,27 @@ type MySequelizeError = {
   name: string;
   value?: any;
 };
+type MyExtra = {
+  foreignKeyField?: string;
+};
 
 export default class SequelizeError extends Error {
   private static readonly statusCode = 400;
 
   private readonly _code: number;
   private readonly _error: any;
+  private readonly _extra: MyExtra;
 
-  constructor(params: { statusCode?: number; error: BaseError }) {
+  constructor(params: {
+    statusCode?: number;
+    error: BaseError;
+    extra?: MyExtra;
+  }) {
     super(params.error.message);
 
     this._code = params.statusCode || SequelizeError.statusCode;
     this._error = params.error;
+    this._extra = params?.extra || {};
 
     // Only because we are extending a built in class
     Object.setPrototypeOf(this, SequelizeError.prototype);
@@ -46,7 +55,11 @@ export default class SequelizeError extends Error {
     list: MySequelizeError[],
     error: ForeignKeyConstraintError
   ) {
-    const field = error.fields ? error.fields[0] : undefined;
+    const field = this._extra?.foreignKeyField
+      ? this._extra?.foreignKeyField
+      : error.fields
+      ? error.fields[0]
+      : undefined;
     const name = "foreign_key";
 
     list.push({ field, name });

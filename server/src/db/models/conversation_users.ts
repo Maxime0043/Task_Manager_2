@@ -21,6 +21,8 @@ class ConversationUsers extends Model {
     type: DataType.UUID,
     allowNull: false,
     primaryKey: true,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   })
   id!: string;
 
@@ -28,6 +30,8 @@ class ConversationUsers extends Model {
   @Column({
     type: DataType.UUID,
     allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   })
   aUserId!: string;
 
@@ -35,6 +39,8 @@ class ConversationUsers extends Model {
   @Column({
     type: DataType.UUID,
     allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   })
   bUserId!: string;
 
