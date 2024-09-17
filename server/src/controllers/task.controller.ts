@@ -478,17 +478,9 @@ export async function remove(req: Request, res: Response) {
 
   try {
     if (value.definitely === true) {
-      // Remove the associations between the task and the users assigned
-      await TaskUsers.destroy({ where: { taskId: task.id }, transaction });
-
-      // Remove the task from the scheduled tasks
-      await TaskScheduled.destroy({ where: { taskId: task.id }, transaction });
-
       // Remove the files associated with the task
       const files = await TaskFiles.findAll({ where: { taskId: task.id } });
       filesToRemovePaths = files.map((file) => file.path);
-
-      await TaskFiles.destroy({ where: { taskId: task.id }, transaction });
     }
 
     // Remove the task
