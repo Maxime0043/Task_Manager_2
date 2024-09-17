@@ -3,6 +3,7 @@ import express from "express";
 const router = express.Router();
 
 // Import Middlewares
+import { constructMulterMiddleware, multerTaskMiddleware } from "../storage";
 
 // Import Controllers
 import {
@@ -24,7 +25,11 @@ router.use("/status", statusRoutes);
 
 router.get("/", listAll);
 router.get("/:id", details);
-router.post("/", create);
+router.post(
+  "/",
+  constructMulterMiddleware(multerTaskMiddleware, "files", false, 20),
+  create
+);
 router.put("/:id", update);
 router.delete("/:id", remove);
 router.post("/restore/:id", restore);

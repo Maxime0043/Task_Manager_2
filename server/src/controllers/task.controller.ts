@@ -9,6 +9,7 @@ import Task, { TASK_PRIORITIES } from "../db/models/task";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 import User from "../db/models/user";
 import TaskUsers from "../db/models/task_users";
+import TaskFiles from "../db/models/task_files";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -163,7 +164,23 @@ export async function create(req: Request, res: Response) {
   try {
     // Create a new task
     task = await Task.create(value, { transaction });
+
+    if (req.files) {
+      // Add the files to the task
+      for (const file of req.files as Express.Multer.File[]) {
+        await TaskFiles.create(
+          {
+            name: file.filename,
+            path: file.path,
+            taskId: task.id,
+            userId: value.creatorId,
+          },
+          { transaction }
+        );
+      }
+    }
   } catch (err) {
+    console.log(err);
     // Rollback the transaction in case of error
     await transaction?.rollback();
 
@@ -207,7 +224,7 @@ export async function create(req: Request, res: Response) {
 
   // Reload the task with the users assigned
   task = await task.reload({
-    include: { model: User, as: "usersAssigned" },
+    include: [{ model: User, as: "usersAssigned" }, TaskFiles],
   });
 
   return res.status(201).json({ task });
