@@ -48,7 +48,12 @@ class Task extends Model {
   percentDone!: number;
 
   @ForeignKey(() => TaskStatus)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   statusId!: number;
 
   @Column({ type: DataType.TEXT, allowNull: true })
@@ -65,11 +70,21 @@ class Task extends Model {
   position!: number;
 
   @ForeignKey(() => Project)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   projectId!: string;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   creatorId!: string;
 
   /**
@@ -88,10 +103,10 @@ class Task extends Model {
   @BelongsToMany(() => User, () => TaskUsers, "taskId", "userId")
   usersAssigned!: User[];
 
-  @HasMany(() => TaskFiles)
+  @HasMany(() => TaskFiles, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   files!: TaskFiles[];
 
-  @HasMany(() => TaskScheduled)
+  @HasMany(() => TaskScheduled, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   scheduled!: TaskScheduled[];
 }
 

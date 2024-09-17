@@ -8,6 +8,7 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  BeforeDestroy,
 } from "sequelize-typescript";
 
 import User from "./user";
@@ -41,7 +42,12 @@ class Client extends Model {
   description!: string;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   creatorId!: string;
 
   /**
@@ -51,8 +57,21 @@ class Client extends Model {
   @BelongsTo(() => User)
   creator!: User;
 
-  @HasMany(() => Project)
+  @HasMany(() => Project, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   projects!: Project[];
+
+  /**
+   * HOOKS
+   */
+
+  @BeforeDestroy
+  static async deleteTasks(instance: Client, options: any) {
+    if (!options.force) return;
+
+    for (const project of instance.projects) {
+      await project.destroy({ force: true });
+    }
+  }
 }
 
 export default Client;

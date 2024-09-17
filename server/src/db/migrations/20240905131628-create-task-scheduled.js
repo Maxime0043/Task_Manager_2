@@ -23,6 +23,8 @@ module.exports = {
       },
       taskId: {
         allowNull: true,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Tasks",
           key: "id",
@@ -31,6 +33,8 @@ module.exports = {
       },
       projectId: {
         allowNull: true,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Projects",
           key: "id",
@@ -39,6 +43,8 @@ module.exports = {
       },
       userId: {
         allowNull: false,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Users",
           key: "id",
