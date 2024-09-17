@@ -11,6 +11,7 @@ import User from "../db/models/user";
 import TaskUsers from "../db/models/task_users";
 import TaskFiles from "../db/models/task_files";
 import { deleteFile, generatePresignedUrl } from "../storage";
+import TaskScheduled from "../db/models/task_scheduled";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -443,8 +444,25 @@ export async function remove(req: Request, res: Response) {
     throw new JoiError({ error: errorParams, isUrlParam: true });
   }
 
+  // Retrieve the payload
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    definitely: Joi.boolean(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
   // Find the task to delete
-  const task = await Task.findByPk(id);
+  const task = await Task.findByPk(id, {
+    paranoid: value.definitely === true ? false : undefined,
+  });
 
   if (!task) {
     throw new SimpleError({
@@ -455,12 +473,42 @@ export async function remove(req: Request, res: Response) {
   }
 
   // Continue with the task removal process
+  const transaction = await Task.sequelize?.transaction();
+  let filesToRemovePaths: string[] = [];
+
   try {
+    if (value.definitely === true) {
+      // Remove the associations between the task and the users assigned
+      await TaskUsers.destroy({ where: { taskId: task.id }, transaction });
+
+      // Remove the task from the scheduled tasks
+      await TaskScheduled.destroy({ where: { taskId: task.id }, transaction });
+
+      // Remove the files associated with the task
+      const files = await TaskFiles.findAll({ where: { taskId: task.id } });
+      filesToRemovePaths = files.map((file) => file.path);
+
+      await TaskFiles.destroy({ where: { taskId: task.id }, transaction });
+    }
+
     // Remove the task
-    await task.destroy();
+    await task.destroy({ force: value.definitely === true, transaction });
+
+    // Delete the files from the storage
+    if (value.definitely === true) {
+      for (const path of filesToRemovePaths) {
+        await deleteFile(path);
+      }
+    }
+
+    // Commit the transaction
+    await transaction?.commit();
 
     return res.sendStatus(200);
   } catch (err) {
+    // Rollback the transaction in case of error
+    await transaction?.rollback();
+
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
     }
