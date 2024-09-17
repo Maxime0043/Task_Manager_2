@@ -7,6 +7,97 @@ import SimpleError from "../errors/SimpleError";
 import JoiError from "../errors/JoiError";
 import SequelizeError from "../errors/SequelizeError";
 import { verifyIdIsUUID } from "../utils/joi_utils";
+import { Op } from "sequelize";
+
+export async function listAll(req: Request, res: Response) {
+  const {
+    lastName,
+    firstName,
+    email,
+    isAdmin,
+    deleted,
+    limit,
+    offset,
+    orderBy,
+    dir,
+  } = req.query;
+
+  // Retrieve the Users columns
+  const userColumns = Object.keys(User.getAttributes()).map((column) =>
+    column.toLowerCase()
+  );
+
+  // Create JOI Schema to validate the query params
+  const schema = Joi.object({
+    lastName: Joi.string().trim().max(255),
+    firstName: Joi.string().trim().max(255),
+    email: Joi.string().trim().max(255),
+    isAdmin: Joi.string().lowercase().valid("true", "false"),
+    deleted: Joi.string().lowercase().valid("true", "false"),
+    limit: Joi.number().integer().min(1).required(),
+    offset: Joi.number().integer().min(0),
+    orderBy: Joi.string()
+      .lowercase()
+      .valid(...userColumns),
+    dir: Joi.string().lowercase().valid("asc", "desc"),
+  });
+
+  // Validate the query params
+  const { error: errorParams } = schema.validate(req.query, {
+    abortEarly: false,
+  });
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Create the where object
+  const where: any = {};
+
+  if (lastName) {
+    where.lastName = { [Op.like]: `%${lastName}%` };
+  }
+  if (firstName) {
+    where.firstName = { [Op.like]: `%${firstName}%` };
+  }
+  if (email) {
+    where.email = { [Op.like]: `%${email}%` };
+  }
+  if (isAdmin) {
+    where.isAdmin = isAdmin === "true";
+  }
+
+  // Find the users
+  const users = await User.findAll({
+    paranoid: deleted === "true" ? false : undefined,
+    where,
+    limit: parseInt(limit as string),
+    offset: offset ? parseInt(offset as string) : undefined,
+    order:
+      orderBy && dir
+        ? [[orderBy as string, dir === "asc" ? "ASC" : "DESC"]]
+        : undefined,
+  });
+
+  return res.status(200).json({ users });
+}
+
+export async function info(req: Request, res: Response) {
+  const id = res.locals.userId;
+
+  // Find the user
+  const user = await User.findByPk(id);
+
+  if (!user) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "User not found",
+    });
+  }
+
+  return res.status(200).json({ user });
+}
 
 export async function create(req: Request, res: Response) {
   const payload = req.body;
@@ -41,6 +132,65 @@ export async function create(req: Request, res: Response) {
     const user = await User.create(value);
 
     return res.status(201).json({ user });
+  } catch (err) {
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
+
+export async function update(req: Request, res: Response) {
+  const id = res.locals.userId;
+
+  // Find the user to update
+  const user = await User.findByPk(id);
+
+  if (!user) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "User not found",
+    });
+  }
+
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    firstName: Joi.string().trim().max(255),
+    lastName: Joi.string().trim().max(255),
+    email: Joi.string().trim().email().max(255),
+    password: Joi.string().trim().min(6).max(16),
+    passwordConfirmation: Joi.string()
+      .trim()
+      .min(6)
+      .max(16)
+      .valid(Joi.ref("password"))
+      .when("password", {
+        is: Joi.exist(),
+        then: Joi.required(),
+        otherwise: Joi.forbidden(),
+      }),
+    icon: Joi.string().trim().uri().max(255),
+    roleId: Joi.number().integer().min(1),
+    isAdmin: Joi.boolean(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Continue with the user update process
+  try {
+    // Update the user
+    const updatedUser = await user.update(value);
+
+    return res.status(200).json({ user: updatedUser });
   } catch (err) {
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
@@ -126,8 +276,25 @@ export async function remove(req: Request, res: Response) {
     throw new JoiError({ error: errorParams, isUrlParam: true });
   }
 
+  // Retrieve the payload
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    definitely: Joi.boolean(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
   // Find the user to delete
-  const user = await User.findByPk(id);
+  const user = await User.findByPk(id, {
+    paranoid: value.definitely === true ? false : undefined,
+  });
 
   if (!user) {
     throw new SimpleError({
@@ -138,12 +305,20 @@ export async function remove(req: Request, res: Response) {
   }
 
   // Continue with the user removal process
+  const transaction = await User.sequelize?.transaction();
+
   try {
     // Remove the user
-    await user.destroy();
+    await user.destroy({ force: value.definitely === true, transaction });
+
+    // Commit the transaction
+    await transaction?.commit();
 
     return res.sendStatus(200);
   } catch (err) {
+    // Rollback the transaction
+    await transaction?.rollback();
+
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
     }

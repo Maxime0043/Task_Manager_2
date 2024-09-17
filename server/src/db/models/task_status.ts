@@ -37,7 +37,7 @@ class TaskStatus extends Model {
    * ASSOCIATIONS
    */
 
-  @HasMany(() => Task)
+  @HasMany(() => Task, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   tasks!: Task[];
 }
 

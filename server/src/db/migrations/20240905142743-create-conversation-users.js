@@ -6,6 +6,8 @@ module.exports = {
       id: {
         allowNull: false,
         primaryKey: true,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Conversations",
           key: "id",
@@ -14,6 +16,8 @@ module.exports = {
       },
       aUserId: {
         allowNull: false,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Users",
           key: "id",
@@ -22,6 +26,8 @@ module.exports = {
       },
       bUserId: {
         allowNull: false,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Users",
           key: "id",

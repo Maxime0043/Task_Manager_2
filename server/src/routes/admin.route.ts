@@ -21,14 +21,12 @@ import {
 import {
   create as createProjectStatus,
   details as detailsProjectStatus,
-  listAll as listAllProjectStatus,
   remove as removeProjectStatus,
   update as updateProjectStatus,
 } from "../controllers/project_status.controller";
 import {
   create as createTaskStatus,
   details as detailsTaskStatus,
-  listAll as listAllTaskStatus,
   remove as removeTaskStatus,
   update as updateTaskStatus,
 } from "../controllers/task_status.controller";
@@ -47,13 +45,11 @@ router.put("/users/:id", updateUser);
 router.delete("/users/:id", removeUser);
 router.post("/users/restore/:id", restoreUser);
 
-router.get("/project_status", listAllProjectStatus);
 router.get("/project_status/:id", detailsProjectStatus);
 router.post("/project_status", createProjectStatus);
 router.put("/project_status/:id", updateProjectStatus);
 router.delete("/project_status/:id", removeProjectStatus);
 
-router.get("/task_status", listAllTaskStatus);
 router.get("/task_status/:id", detailsTaskStatus);
 router.post("/task_status", createTaskStatus);
 router.put("/task_status/:id", updateTaskStatus);

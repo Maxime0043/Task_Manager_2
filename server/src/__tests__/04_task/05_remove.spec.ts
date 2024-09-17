@@ -13,6 +13,7 @@ import Task from "../../db/models/task";
 const urlWithoutId = "/api/v1/tasks";
 var url = urlWithoutId;
 var cookie: string;
+var task: Task;
 
 describe(`DELETE ${url}/:id`, () => {
   beforeAll(async () => {
@@ -55,7 +56,7 @@ describe(`DELETE ${url}/:id`, () => {
     });
 
     // Create a task
-    const task = await Task.create({
+    task = await Task.create({
       name: `Task 1`,
       timeEstimate: "16.00",
       deadline: "2024-09-12 09:30:00",
@@ -117,5 +118,28 @@ describe(`DELETE ${url}/:id`, () => {
     const resDetails = await supertest(app).get(url).set("Cookie", cookie);
 
     expect(resDetails.status).toBe(404);
+
+    // Reload the task and check if it is deleted
+    task = await task.reload({ paranoid: false });
+
+    expect(task.deletedAt).toBeDefined();
+  });
+
+  it("should return 200 and remove the task definitely", async () => {
+    const res = await supertest(app)
+      .delete(url)
+      .set("Cookie", cookie)
+      .send({ definitely: true });
+
+    expect(res.status).toBe(200);
+
+    const resDetails = await supertest(app).get(url).set("Cookie", cookie);
+
+    expect(resDetails.status).toBe(404);
+
+    // Reload the task and check if it is deleted
+    const taskDeleted = await Task.findByPk(task.id, { paranoid: false });
+
+    expect(taskDeleted).toBeNull();
   });
 });
