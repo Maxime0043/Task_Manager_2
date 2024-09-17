@@ -30,7 +30,11 @@ router.post(
   constructMulterMiddleware(multerTaskMiddleware, "files", false, 20),
   create
 );
-router.put("/:id", update);
+router.put(
+  "/:id",
+  constructMulterMiddleware(multerTaskMiddleware, "files", false, 20),
+  update
+);
 router.delete("/:id", remove);
 router.post("/restore/:id", restore);
 
