@@ -15,6 +15,8 @@ module.exports = {
       },
       messageId: {
         allowNull: false,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Messages",
           key: "id",
