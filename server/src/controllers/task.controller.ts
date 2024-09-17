@@ -10,7 +10,7 @@ import { verifyIdIsUUID } from "../utils/joi_utils";
 import User from "../db/models/user";
 import TaskUsers from "../db/models/task_users";
 import TaskFiles from "../db/models/task_files";
-import { deleteFile } from "../storage";
+import { deleteFile, generatePresignedUrl } from "../storage";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -106,11 +106,14 @@ export async function details(req: Request, res: Response) {
 
   // Find the task
   const task = await Task.findByPk(id, {
-    include: {
-      model: User,
-      as: "usersAssigned",
-      attributes: ["id", "firstname", "lastname", "icon"],
-    },
+    include: [
+      {
+        model: User,
+        as: "usersAssigned",
+        attributes: ["id", "firstname", "lastname", "icon"],
+      },
+      TaskFiles,
+    ],
   });
 
   if (!task) {
@@ -121,7 +124,16 @@ export async function details(req: Request, res: Response) {
     });
   }
 
-  return res.status(200).json({ task });
+  // Generate urls for the files
+  const urls: { [key: string]: string } = {};
+
+  if (task.files) {
+    for (const file of task.files) {
+      urls[`file_${file.id}`] = await generatePresignedUrl(file.path);
+    }
+  }
+
+  return res.status(200).json({ task, urls });
 }
 
 export async function create(req: Request, res: Response) {
