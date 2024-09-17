@@ -5,6 +5,7 @@ import Client from "../db/models/client";
 import Project from "../db/models/project";
 import Task from "../db/models/task";
 import TaskScheduled from "../db/models/task_scheduled";
+import User from "../db/models/user";
 
 export default async function initDB() {
   // Create the UserRoles
@@ -119,6 +120,74 @@ export default async function initDB() {
       updatedAt: new Date(),
     },
   ]);
+}
+
+export async function populateUserRoles() {
+  // Create the userRoles
+  const userRoles: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    userRoles.push({
+      name: `role ${i}`,
+      label: `Role ${i}`,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await UserRoles.bulkCreate(userRoles);
+}
+
+export async function populateProjectStatus() {
+  // Create the projectStatus
+  const projectStatus: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    projectStatus.push({
+      name: `status ${i}`,
+      label: `Status ${i}`,
+      color: "#FF0000",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await ProjectStatus.bulkCreate(projectStatus);
+}
+
+export async function populateTaskStatus() {
+  // Create the taskStatus
+  const taskStatus: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    taskStatus.push({
+      name: `status ${i}`,
+      label: `Status ${i}`,
+      color: "#FF0000",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await TaskStatus.bulkCreate(taskStatus);
+}
+
+export async function populateUsers() {
+  // Create the users
+  const users: any = [];
+
+  for (let i = 1; i <= 20; i++) {
+    users.push({
+      lastName: `Doe ${i}`,
+      firstName: `John ${i}`,
+      email: `john.doe${i}@example.com`,
+      password: "password",
+      passwordConfirmation: "password",
+      roleId: 1,
+    });
+  }
+
+  await User.bulkCreate(users);
 }
 
 export async function populateClients(creatorId: string) {

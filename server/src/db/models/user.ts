@@ -58,7 +58,7 @@ class User extends Model {
   roleId!: string;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
-  isAdmin!: string;
+  isAdmin!: boolean;
 
   /**
    * ASSOCIATIONS

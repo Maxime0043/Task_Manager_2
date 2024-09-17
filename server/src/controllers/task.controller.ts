@@ -9,6 +9,8 @@ import Task, { TASK_PRIORITIES } from "../db/models/task";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 import User from "../db/models/user";
 import TaskUsers from "../db/models/task_users";
+import TaskFiles from "../db/models/task_files";
+import { deleteFile } from "../storage";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -163,6 +165,21 @@ export async function create(req: Request, res: Response) {
   try {
     // Create a new task
     task = await Task.create(value, { transaction });
+
+    if (req.files) {
+      // Add the files to the task
+      for (const file of req.files as Express.Multer.File[]) {
+        await TaskFiles.create(
+          {
+            name: file.filename,
+            path: file.path,
+            taskId: task.id,
+            userId: value.creatorId,
+          },
+          { transaction }
+        );
+      }
+    }
   } catch (err) {
     // Rollback the transaction in case of error
     await transaction?.rollback();
@@ -207,7 +224,7 @@ export async function create(req: Request, res: Response) {
 
   // Reload the task with the users assigned
   task = await task.reload({
-    include: { model: User, as: "usersAssigned" },
+    include: [{ model: User, as: "usersAssigned" }, TaskFiles],
   });
 
   return res.status(201).json({ task });
@@ -252,6 +269,7 @@ export async function update(req: Request, res: Response) {
     usersAssigned: Joi.array()
       .items(Joi.string().uuid({ version: "uuidv4" }))
       .min(1),
+    filesToRemoveId: Joi.array().items(Joi.number().integer().min(1)),
   });
 
   // Validate the payload
@@ -260,6 +278,10 @@ export async function update(req: Request, res: Response) {
   if (error) {
     throw new JoiError({ error });
   }
+
+  // Retrieve the filesToRemoveId from the value
+  const filesToRemoveId: number[] | undefined = value.filesToRemoveId;
+  delete value.filesToRemoveId;
 
   // Format the users assigned to the task
   const usersAssigned: string[] | undefined = value.usersAssigned;
@@ -271,7 +293,7 @@ export async function update(req: Request, res: Response) {
 
   try {
     // Update the task
-    updatedTask = await task.update(value);
+    updatedTask = await task.update(value, { transaction });
   } catch (err) {
     // Rollback the transaction in case of error
     await transaction?.rollback();
@@ -322,12 +344,78 @@ export async function update(req: Request, res: Response) {
     }
   }
 
+  // Update the files assigned to the task
+  if (req.files) {
+    try {
+      // Add the files to the task
+      for (const file of req.files as Express.Multer.File[]) {
+        await TaskFiles.create(
+          {
+            name: file.filename,
+            path: file.path,
+            taskId: updatedTask.id,
+            userId: updatedTask.creatorId,
+          },
+          { transaction }
+        );
+      }
+    } catch (err) {
+      // Rollback the transaction in case of error
+      await transaction?.rollback();
+
+      if (err instanceof BaseError) {
+        throw new SequelizeError({ statusCode: 409, error: err });
+      }
+
+      throw err;
+    }
+  }
+  if (filesToRemoveId) {
+    let filesToRemovePaths: string[];
+
+    try {
+      // Retrieve the files to remove
+      const filesToRemove = await TaskFiles.findAll({
+        where: {
+          id: { [Op.in]: filesToRemoveId },
+          taskId: updatedTask.id,
+        },
+        transaction,
+      });
+
+      filesToRemovePaths = filesToRemove.map((file) => file.path);
+
+      // Delete the files from the database
+      await TaskFiles.destroy({
+        where: {
+          id: { [Op.in]: filesToRemoveId },
+          taskId: updatedTask.id,
+        },
+        transaction,
+      });
+    } catch (err) {
+      // Rollback the transaction in case of error
+      await transaction?.rollback();
+
+      if (err instanceof BaseError) {
+        throw new SequelizeError({ statusCode: 409, error: err });
+      }
+
+      throw err;
+    }
+
+    // Delete the files from the storage
+    for (const path of filesToRemovePaths) {
+      await deleteFile(path);
+    }
+  }
+
   // Commit the transaction
   await transaction?.commit();
 
   // Reload the task with the users assigned
   updatedTask = await updatedTask.reload({
-    include: { model: User, as: "usersAssigned" },
+    include: [{ model: User, as: "usersAssigned" }, TaskFiles],
   });
 
   return res.status(200).json({ task: updatedTask });
