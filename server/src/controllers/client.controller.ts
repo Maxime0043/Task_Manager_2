@@ -7,6 +7,10 @@ import SimpleError from "../errors/SimpleError";
 import JoiError from "../errors/JoiError";
 import SequelizeError from "../errors/SequelizeError";
 import { verifyIdIsUUID } from "../utils/joi_utils";
+import Project from "../db/models/project";
+import Task from "../db/models/task";
+import TaskFiles from "../db/models/task_files";
+import { deleteFile } from "../storage";
 
 export async function listAll(req: Request, res: Response) {
   const { name, email, deleted, limit, offset, orderBy, dir } = req.query;
@@ -186,8 +190,31 @@ export async function remove(req: Request, res: Response) {
     throw new JoiError({ error: errorParams, isUrlParam: true });
   }
 
+  // Retrieve the payload
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    definitely: Joi.boolean(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
   // Find the client to delete
-  const client = await Client.findByPk(id);
+  const client = await Client.findByPk(id, {
+    paranoid: value.definitely === true ? false : undefined,
+    include: [
+      {
+        model: Project,
+        include: [{ model: Task, include: [{ model: TaskFiles }] }],
+      },
+    ],
+  });
 
   if (!client) {
     throw new SimpleError({
@@ -198,12 +225,39 @@ export async function remove(req: Request, res: Response) {
   }
 
   // Continue with the client removal process
+  const transaction = await Client.sequelize?.transaction();
+  let filesToRemovePaths: string[] = [];
+
   try {
+    if (value.definitely === true) {
+      // Retrieve the files paths to remove
+      filesToRemovePaths = client.projects.reduce((acc: string[], project) => {
+        project.tasks.forEach((task) => {
+          acc.push(...task.files.map((file) => file.path));
+        });
+
+        return acc;
+      }, []);
+    }
+
     // Remove the client
-    await client.destroy();
+    await client.destroy({ force: value.definitely === true, transaction });
+
+    // Delete the files from the storage
+    if (value.definitely === true) {
+      for (const path of filesToRemovePaths) {
+        await deleteFile(path);
+      }
+    }
+
+    // Commit the transaction
+    await transaction?.commit();
 
     return res.sendStatus(200);
   } catch (err) {
+    // Rollback the transaction
+    await transaction?.rollback();
+
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
     }

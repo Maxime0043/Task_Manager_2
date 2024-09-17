@@ -36,7 +36,7 @@ class ProjectStatus extends Model {
    * ASSOCIATIONS
    */
 
-  @HasMany(() => Project)
+  @HasMany(() => Project, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   projects!: Project[];
 }
 

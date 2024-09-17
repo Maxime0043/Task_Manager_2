@@ -23,11 +23,21 @@ class TaskUsers extends Model {
   id!: number;
 
   @ForeignKey(() => Task)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   taskId!: string;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   userId!: string;
 
   /**
