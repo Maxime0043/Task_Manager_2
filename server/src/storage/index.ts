@@ -107,3 +107,16 @@ export async function deleteFile(filename: string): Promise<void> {
     throw new Error(`Failed to delete file: ${err}`);
   }
 }
+
+// Delete multiple files from an express request from the storage
+export async function deleteFilesFromExpressRequest(
+  files: Express.Multer.File[]
+): Promise<void> {
+  try {
+    for (const file of files) {
+      await minioClient.removeObject(process.env.MINIO_BUCKET!, file.path);
+    }
+  } catch (err) {
+    throw new Error(`Failed to delete files: ${err}`);
+  }
+}
