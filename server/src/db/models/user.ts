@@ -54,11 +54,13 @@ class User extends Model {
   @Column({
     type: DataType.INTEGER,
     allowNull: true,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   })
   roleId!: string;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
-  isAdmin!: string;
+  isAdmin!: boolean;
 
   /**
    * ASSOCIATIONS
@@ -67,25 +69,40 @@ class User extends Model {
   @BelongsTo(() => UserRoles)
   userRole!: UserRoles;
 
-  @HasMany(() => Client)
+  @HasMany(() => Client, {
+    onDelete: "SET NULL",
+    onUpdate: "CASCADE",
+  })
   clientsCreated!: Client[];
 
-  @HasMany(() => Project, "managerId")
+  @HasMany(() => Project, {
+    foreignKey: "managerId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   projectsManaged!: Project[];
 
-  @HasMany(() => Project, "creatorId")
+  @HasMany(() => Project, {
+    foreignKey: "creatorId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   projectsCreated!: Project[];
 
-  @HasMany(() => Task, "creatorId")
+  @HasMany(() => Task, {
+    foreignKey: "creatorId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   tasksCreated!: Task[];
 
   @BelongsToMany(() => Task, () => TaskUsers, "userId", "taskId")
   tasksAssigned!: Task[];
 
-  @HasMany(() => TaskFiles)
+  @HasMany(() => TaskFiles, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   filesAddedToTasks!: TaskFiles[];
 
-  @HasMany(() => TaskScheduled)
+  @HasMany(() => TaskScheduled, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   tasksScheduled!: TaskScheduled[];
 
   /**
