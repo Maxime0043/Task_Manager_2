@@ -11,6 +11,7 @@ import Client from "../../db/models/client";
 const urlWithoutId = "/api/v1/clients";
 var url = urlWithoutId;
 var cookie: string;
+var client: Client;
 
 describe(`DELETE ${url}/:id`, () => {
   beforeAll(async () => {
@@ -31,7 +32,7 @@ describe(`DELETE ${url}/:id`, () => {
     });
 
     // Create a client
-    const client = await Client.create({
+    client = await Client.create({
       name: `My Client 1`,
       email: `myclient1@example.com`,
       description: `Description of the client 1`,
@@ -88,5 +89,30 @@ describe(`DELETE ${url}/:id`, () => {
     const resDetails = await supertest(app).get(url).set("Cookie", cookie);
 
     expect(resDetails.status).toBe(404);
+
+    // Reload the client and check if it is deleted
+    client = await client.reload({ paranoid: false });
+
+    expect(client.deletedAt).toBeDefined();
+  });
+
+  it("should return 200 and remove the client definitely", async () => {
+    const res = await supertest(app)
+      .delete(url)
+      .set("Cookie", cookie)
+      .send({ definitely: true });
+
+    expect(res.status).toBe(200);
+
+    const resDetails = await supertest(app).get(url).set("Cookie", cookie);
+
+    expect(resDetails.status).toBe(404);
+
+    // Reload the client and check if it is deleted
+    const clientDeleted = await Client.findByPk(client.id, {
+      paranoid: false,
+    });
+
+    expect(clientDeleted).toBeNull();
   });
 });
