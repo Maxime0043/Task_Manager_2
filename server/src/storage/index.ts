@@ -98,3 +98,12 @@ export function constructMulterMiddleware(
     };
   }
 }
+
+// Delete a file from the storage
+export async function deleteFile(filename: string): Promise<void> {
+  try {
+    await minioClient.removeObject(process.env.MINIO_BUCKET!, filename);
+  } catch (err) {
+    throw new Error(`Failed to delete file: ${err}`);
+  }
+}
