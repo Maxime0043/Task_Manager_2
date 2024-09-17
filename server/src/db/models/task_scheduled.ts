@@ -34,15 +34,30 @@ class TaskScheduled extends Model {
   end!: Date;
 
   @ForeignKey(() => Task)
-  @Column({ type: DataType.UUID, allowNull: true })
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   taskId!: string;
 
   @ForeignKey(() => Project)
-  @Column({ type: DataType.UUID, allowNull: true })
+  @Column({
+    type: DataType.UUID,
+    allowNull: true,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   projectId!: string;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   userId!: string;
 
   @Column(DataType.VIRTUAL)

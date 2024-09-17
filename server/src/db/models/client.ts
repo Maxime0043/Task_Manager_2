@@ -41,7 +41,12 @@ class Client extends Model {
   description!: string;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   creatorId!: string;
 
   /**
@@ -51,7 +56,7 @@ class Client extends Model {
   @BelongsTo(() => User)
   creator!: User;
 
-  @HasMany(() => Project)
+  @HasMany(() => Project, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   projects!: Project[];
 }
 

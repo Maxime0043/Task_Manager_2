@@ -24,7 +24,7 @@ class UserRoles extends Model {
    * ASSOCIATIONS
    */
 
-  @HasMany(() => User)
+  @HasMany(() => User, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   users!: User[];
 }
 

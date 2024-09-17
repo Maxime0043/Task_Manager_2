@@ -41,16 +41,19 @@ class Conversation extends Model {
    * ASSOCIATIONS
    */
 
-  @HasOne(() => ConversationUsers)
+  @HasOne(() => ConversationUsers, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   conversationUsers!: ConversationUsers;
 
-  @HasOne(() => ConversationProjects)
+  @HasOne(() => ConversationProjects, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   conversationProjects!: ConversationProjects;
 
-  @HasOne(() => ConversationTasks)
+  @HasOne(() => ConversationTasks, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   conversationTasks!: ConversationTasks;
 
-  @HasMany(() => Message)
+  @HasMany(() => Message, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   messages!: Message[];
 }
 
