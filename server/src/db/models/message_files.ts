@@ -26,7 +26,12 @@ class MessageFiles extends Model {
   path!: string;
 
   @ForeignKey(() => Message)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   messageId!: string;
 
   /**
