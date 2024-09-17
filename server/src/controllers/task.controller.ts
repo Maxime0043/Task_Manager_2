@@ -371,6 +371,8 @@ export async function update(req: Request, res: Response) {
     }
   }
   if (filesToRemoveId) {
+    let filesToRemovePaths: string[];
+
     try {
       // Retrieve the files to remove
       const filesToRemove = await TaskFiles.findAll({
@@ -381,7 +383,7 @@ export async function update(req: Request, res: Response) {
         transaction,
       });
 
-      const filesToRemovePaths = filesToRemove.map((file) => file.path);
+      filesToRemovePaths = filesToRemove.map((file) => file.path);
 
       // Delete the files from the database
       await TaskFiles.destroy({
@@ -391,11 +393,6 @@ export async function update(req: Request, res: Response) {
         },
         transaction,
       });
-
-      // Delete the files from the storage
-      for (const path of filesToRemovePaths) {
-        await deleteFile(path);
-      }
     } catch (err) {
       // Rollback the transaction in case of error
       await transaction?.rollback();
@@ -405,6 +402,11 @@ export async function update(req: Request, res: Response) {
       }
 
       throw err;
+    }
+
+    // Delete the files from the storage
+    for (const path of filesToRemovePaths) {
+      await deleteFile(path);
     }
   }
 
