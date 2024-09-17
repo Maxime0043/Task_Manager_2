@@ -8,7 +8,10 @@ import {
   BelongsTo,
   HasMany,
   BelongsToMany,
+  BeforeCreate,
+  BeforeUpdate,
 } from "sequelize-typescript";
+import bcrypt from "bcrypt";
 
 import UserRoles from "./user_role";
 import Client from "./client";
@@ -55,7 +58,7 @@ class User extends Model {
   roleId!: string;
 
   @Column({ type: DataType.BOOLEAN, allowNull: false, defaultValue: false })
-  isAdmin!: string;
+  isAdmin!: boolean;
 
   /**
    * ASSOCIATIONS
@@ -84,6 +87,19 @@ class User extends Model {
 
   @HasMany(() => TaskScheduled)
   tasksScheduled!: TaskScheduled[];
+
+  /**
+   * HOOKS
+   */
+
+  // This hook is called before the user is created
+  @BeforeCreate
+  @BeforeUpdate
+  static async hashPassword(instance: User) {
+    // Hash the password
+    const salt = await bcrypt.genSalt(10);
+    instance.password = await bcrypt.hash(instance.password, salt);
+  }
 }
 
 export default User;
