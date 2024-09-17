@@ -276,8 +276,25 @@ export async function remove(req: Request, res: Response) {
     throw new JoiError({ error: errorParams, isUrlParam: true });
   }
 
+  // Retrieve the payload
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    definitely: Joi.boolean(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
   // Find the user to delete
-  const user = await User.findByPk(id);
+  const user = await User.findByPk(id, {
+    paranoid: value.definitely === true ? false : undefined,
+  });
 
   if (!user) {
     throw new SimpleError({
@@ -288,12 +305,20 @@ export async function remove(req: Request, res: Response) {
   }
 
   // Continue with the user removal process
+  const transaction = await User.sequelize?.transaction();
+
   try {
     // Remove the user
-    await user.destroy();
+    await user.destroy({ force: value.definitely === true, transaction });
+
+    // Commit the transaction
+    await transaction?.commit();
 
     return res.sendStatus(200);
   } catch (err) {
+    // Rollback the transaction
+    await transaction?.rollback();
+
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
     }
