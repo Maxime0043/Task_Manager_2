@@ -15,6 +15,8 @@ module.exports = {
       },
       statusId: {
         allowNull: false,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "ProjectStatus",
           key: "id",
@@ -36,6 +38,8 @@ module.exports = {
       },
       managerId: {
         allowNull: false,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Users",
           key: "id",
@@ -44,6 +48,8 @@ module.exports = {
       },
       clientId: {
         allowNull: true,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Clients",
           key: "id",
@@ -52,6 +58,8 @@ module.exports = {
       },
       creatorId: {
         allowNull: false,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "Users",
           key: "id",

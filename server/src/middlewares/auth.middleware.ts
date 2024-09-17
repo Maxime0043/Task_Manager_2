@@ -1,6 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
+import User from "../db/models/user";
+
 export function auth(req: Request, res: Response, next: NextFunction) {
   if (req.session.token) {
     // Decode the token
@@ -26,6 +28,25 @@ export function auth(req: Request, res: Response, next: NextFunction) {
 export function authRequired(req: Request, res: Response, next: NextFunction) {
   if (req.session.token) {
     next();
+  } else {
+    return res.sendStatus(401);
+  }
+}
+
+export async function adminRequired(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  if (req.session.token) {
+    // Retrieve the user
+    const user = await User.findByPk(res.locals.userId);
+
+    if (user && user.isAdmin) {
+      next();
+    } else {
+      return res.sendStatus(403);
+    }
   } else {
     return res.sendStatus(401);
   }
