@@ -21,6 +21,8 @@ class ConversationProjects extends Model {
     type: DataType.UUID,
     allowNull: false,
     primaryKey: true,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   })
   id!: string;
 
@@ -28,6 +30,8 @@ class ConversationProjects extends Model {
   @Column({
     type: DataType.UUID,
     allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
   })
   projectId!: string;
 

@@ -28,11 +28,21 @@ class Message extends Model {
   content!: string;
 
   @ForeignKey(() => Conversation)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   conversationId!: string;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   userId!: string;
 
   /**
@@ -45,7 +55,7 @@ class Message extends Model {
   @BelongsTo(() => User)
   user!: User;
 
-  @HasMany(() => MessageFiles)
+  @HasMany(() => MessageFiles, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   files!: MessageFiles[];
 }
 

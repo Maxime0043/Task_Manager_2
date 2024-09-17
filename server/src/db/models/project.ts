@@ -6,6 +6,7 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  BeforeDestroy,
 } from "sequelize-typescript";
 
 import User from "./user";
@@ -31,10 +32,15 @@ class Project extends Model {
   name!: string;
 
   @ForeignKey(() => ProjectStatus)
-  @Column({ type: DataType.INTEGER, allowNull: false })
+  @Column({
+    type: DataType.INTEGER,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   statusId!: number;
 
-  @Column({ type: DataType.DECIMAL(12, 2), allowNull: false })
+  @Column({ type: DataType.DECIMAL(12, 2), allowNull: true })
   budget!: number;
 
   @Column({ type: DataType.TEXT, allowNull: true })
@@ -44,15 +50,30 @@ class Project extends Model {
   isInternalProject!: boolean;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   managerId!: string;
 
   @ForeignKey(() => Client)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   clientId!: string;
 
   @ForeignKey(() => User)
-  @Column({ type: DataType.UUID, allowNull: false })
+  @Column({
+    type: DataType.UUID,
+    allowNull: false,
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
   creatorId!: string;
 
   /**
@@ -71,11 +92,24 @@ class Project extends Model {
   @BelongsTo(() => User, "creatorId")
   creator!: User;
 
-  @HasMany(() => Task)
+  @HasMany(() => Task, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   tasks!: Task[];
 
-  @HasMany(() => TaskScheduled)
+  @HasMany(() => TaskScheduled, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   taskScheduled!: TaskScheduled[];
+
+  /**
+   * HOOKS
+   */
+
+  @BeforeDestroy
+  static async deleteTasks(instance: Project, options: any) {
+    if (!options.force) return;
+
+    for (const task of instance.tasks) {
+      await task.destroy({ force: true });
+    }
+  }
 }
 
 export default Project;
