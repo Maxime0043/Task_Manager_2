@@ -120,3 +120,19 @@ export async function deleteFilesFromExpressRequest(
     throw new Error(`Failed to delete files: ${err}`);
   }
 }
+
+// Generate a presigned URL for a file
+export async function generatePresignedUrl(
+  filename: string,
+  expiry: number = 3600 * 24 * 7
+): Promise<string> {
+  try {
+    return await minioClient.presignedGetObject(
+      process.env.MINIO_BUCKET!,
+      filename,
+      expiry
+    );
+  } catch (err) {
+    throw new Error(`Failed to generate presigned URL: ${err}`);
+  }
+}
