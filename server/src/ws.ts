@@ -10,6 +10,7 @@ import {
   InterServerEvents,
   ServerToClientEvents,
   SocketData,
+  UserSocket,
 } from "./websocket/utils/interfaces";
 
 // Define the WebSocket server
@@ -31,8 +32,16 @@ export const io = new Server<
 io.engine.use(helmet());
 io.engine.use(sessionMiddleware);
 
+// Relation between idUser and idSocket
+export const userSockets: Record<string, UserSocket> = {}; // { userId: {socket: socketId, room: room} }
+
+// Import middlewares
+import socketMiddleware from "./websocket/middlewares/index.middleware";
+
 // Websocket connection
 io.on("connection", (socket) => {
+  socketMiddleware(socket);
+
   console.log("Client connected");
 
   // Client disconnection

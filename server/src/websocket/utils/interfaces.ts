@@ -6,3 +6,8 @@ export interface SocketData {
   userId: string | null;
   converationId: string | null;
 }
+
+export interface UserSocket {
+  socket: string;
+  room: string | undefined;
+}
