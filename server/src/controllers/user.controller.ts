@@ -80,6 +80,13 @@ export async function listAll(req: Request, res: Response) {
         : undefined,
   });
 
+  // Generate the icon URL for each user
+  for (const user of users) {
+    if (user.icon) {
+      user.icon = await generatePresignedUrl(user.icon);
+    }
+  }
+
   return res.status(200).json({ users });
 }
 
