@@ -8,6 +8,7 @@ import JoiError from "../errors/JoiError";
 import SequelizeError from "../errors/SequelizeError";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 import { Op } from "sequelize";
+import { deleteFile, generatePresignedUrl } from "../storage";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -173,7 +174,6 @@ export async function update(req: Request, res: Response) {
         then: Joi.required(),
         otherwise: Joi.forbidden(),
       }),
-    icon: Joi.string().trim().uri().max(255),
     roleId: Joi.number().integer().min(1),
     isAdmin: Joi.boolean(),
   });
@@ -188,7 +188,19 @@ export async function update(req: Request, res: Response) {
   // Continue with the user update process
   try {
     // Update the user
-    const updatedUser = await user.update(value);
+    let updatedUser = await user.update(value);
+
+    // Delete the icon if it exists
+    if (updatedUser.icon) {
+      await deleteFile(user.icon);
+    }
+    // Update the icon if it exists
+    if (req.file) {
+      updatedUser = await user.update({ icon: req.file.path });
+
+      // Generate the icon URL
+      updatedUser.icon = await generatePresignedUrl(updatedUser.icon);
+    }
 
     return res.status(200).json({ user: updatedUser });
   } catch (err) {
