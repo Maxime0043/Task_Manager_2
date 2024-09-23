@@ -12,6 +12,7 @@ import {
   SocketData,
   UserSocket,
 } from "./websocket/utils/interfaces";
+import SocketError from "./websocket/errors/SocketError";
 
 // Define the WebSocket server
 export const io = new Server<
@@ -42,12 +43,21 @@ import socketMiddleware from "./websocket/middlewares/index.middleware";
 io.on("connection", (socket) => {
   socketMiddleware(socket);
 
-  console.log("Client connected");
+  // Manage Error
+  socket.on("error", (err) => {
+    if (err instanceof SocketError) {
+      socket.emit("error", { error: err.error });
+    } else {
+      const myError = new SocketError({
+        event: "unknown",
+        name: "UnknownError",
+      });
+      socket.emit("error", { error: myError.error });
+    }
+  });
 
   // Client disconnection
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-  });
+  socket.on("disconnect", () => {});
 });
 
 io.engine.on("connection_error", (err) => {
