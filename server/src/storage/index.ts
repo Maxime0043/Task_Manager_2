@@ -15,7 +15,7 @@ import { normalizeString } from "../utils/format";
 export const minioClient = new Client({
   endPoint: process.env.MINIO_ENDPOINT!,
   port: process.env.MINIO_PORT ? parseInt(process.env.MINIO_PORT) : 9000,
-  useSSL: true, // Permer d'utiliser le protocole HTTPS
+  useSSL: process.env.SECURE_MINIO === "true", // Permer d'utiliser le protocole HTTPS
   accessKey: process.env.MINIO_ACCESS_KEY!,
   secretKey: process.env.MINIO_SECRET_KEY!,
 });

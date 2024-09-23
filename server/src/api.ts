@@ -41,7 +41,7 @@ export const sessionMiddleware = session({
   // proxy: false,
   cookie: {
     maxAge: 1000 * 60 * 60, // 1 hour
-    secure: true,
+    secure: process.env.SECURE_SESSION === "true",
     sameSite: "none",
     httpOnly: false,
     domain: process.env.SESSION_DOMAIN,
