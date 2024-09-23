@@ -32,6 +32,8 @@ module.exports = {
       },
       roleId: {
         allowNull: true,
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
         references: {
           model: "UserRoles",
           key: "id",
