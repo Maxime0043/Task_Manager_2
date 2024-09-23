@@ -8,6 +8,7 @@ import JoiError from "../errors/JoiError";
 import SequelizeError from "../errors/SequelizeError";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 import { Op } from "sequelize";
+import { deleteFile, generatePresignedUrl } from "../storage";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -77,7 +78,15 @@ export async function listAll(req: Request, res: Response) {
       orderBy && dir
         ? [[orderBy as string, dir === "asc" ? "ASC" : "DESC"]]
         : undefined,
+    attributes: { exclude: ["password"] },
   });
+
+  // Generate the icon URL for each user
+  for (const user of users) {
+    if (user.icon) {
+      user.icon = await generatePresignedUrl(user.icon);
+    }
+  }
 
   return res.status(200).json({ users });
 }
@@ -86,7 +95,9 @@ export async function info(req: Request, res: Response) {
   const id = res.locals.userId;
 
   // Find the user
-  const user = await User.findByPk(id);
+  const user = await User.findByPk(id, {
+    attributes: { exclude: ["password"] },
+  });
 
   if (!user) {
     throw new SimpleError({
@@ -94,6 +105,11 @@ export async function info(req: Request, res: Response) {
       name: "not_found",
       message: "User not found",
     });
+  }
+
+  // Generate the icon URL
+  if (user.icon) {
+    user.icon = await generatePresignedUrl(user.icon);
   }
 
   return res.status(200).json({ user });
@@ -128,10 +144,12 @@ export async function create(req: Request, res: Response) {
 
   // Continue with the user creation process
   try {
-    // Create a new user
     const user = await User.create(value);
 
-    return res.status(201).json({ user });
+    // Remove the password from the response
+    const { password, ...userWithoutPassword } = user.toJSON();
+
+    return res.status(201).json({ userWithoutPassword });
   } catch (err) {
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
@@ -173,7 +191,6 @@ export async function update(req: Request, res: Response) {
         then: Joi.required(),
         otherwise: Joi.forbidden(),
       }),
-    icon: Joi.string().trim().uri().max(255),
     roleId: Joi.number().integer().min(1),
     isAdmin: Joi.boolean(),
   });
@@ -188,7 +205,19 @@ export async function update(req: Request, res: Response) {
   // Continue with the user update process
   try {
     // Update the user
-    const updatedUser = await user.update(value);
+    let updatedUser = await user.update(value);
+
+    // Delete the icon if it exists
+    if (updatedUser.icon) {
+      await deleteFile(user.icon);
+    }
+    // Update the icon if it exists
+    if (req.file) {
+      updatedUser = await user.update({ icon: req.file.path });
+
+      // Generate the icon URL
+      updatedUser.icon = await generatePresignedUrl(updatedUser.icon);
+    }
 
     return res.status(200).json({ user: updatedUser });
   } catch (err) {
