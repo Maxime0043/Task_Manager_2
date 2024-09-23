@@ -78,6 +78,7 @@ export async function listAll(req: Request, res: Response) {
       orderBy && dir
         ? [[orderBy as string, dir === "asc" ? "ASC" : "DESC"]]
         : undefined,
+    attributes: { exclude: ["password"] },
   });
 
   // Generate the icon URL for each user
@@ -94,7 +95,9 @@ export async function info(req: Request, res: Response) {
   const id = res.locals.userId;
 
   // Find the user
-  const user = await User.findByPk(id);
+  const user = await User.findByPk(id, {
+    attributes: { exclude: ["password"] },
+  });
 
   if (!user) {
     throw new SimpleError({
@@ -141,10 +144,12 @@ export async function create(req: Request, res: Response) {
 
   // Continue with the user creation process
   try {
-    // Create a new user
     const user = await User.create(value);
 
-    return res.status(201).json({ user });
+    // Remove the password from the response
+    const { password, ...userWithoutPassword } = user.toJSON();
+
+    return res.status(201).json({ userWithoutPassword });
   } catch (err) {
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
