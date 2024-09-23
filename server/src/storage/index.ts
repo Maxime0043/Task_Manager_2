@@ -8,13 +8,14 @@ import { MinioStorageEngine } from "@namatery/multer-minio";
 import { IStorageOptions } from "@namatery/multer-minio/dist/lib/storage.options";
 import { NextFunction, Request, Response } from "express";
 import MulterError from "../errors/MulterError";
+import SimpleError from "../errors/SimpleError";
 import { normalizeString } from "../utils/format";
 
 // Minio client
 export const minioClient = new Client({
   endPoint: process.env.MINIO_ENDPOINT!,
   port: process.env.MINIO_PORT ? parseInt(process.env.MINIO_PORT) : 9000,
-  useSSL: false, // Permer d'utiliser le protocole HTTPS
+  useSSL: true, // Permer d'utiliser le protocole HTTPS
   accessKey: process.env.MINIO_ACCESS_KEY!,
   secretKey: process.env.MINIO_SECRET_KEY!,
 });
@@ -36,6 +37,14 @@ const options: IStorageOptions = {
   },
 };
 
+const storageUser = new MinioStorageEngine(
+  minioClient,
+  process.env.MINIO_BUCKET!,
+  {
+    ...options,
+    path: "/uploads/users",
+  }
+);
 const storageTask = new MinioStorageEngine(
   minioClient,
   process.env.MINIO_BUCKET!,
@@ -60,6 +69,22 @@ export const multerOptions = {
   },
 };
 
+export const multerUserMiddleware = multer({
+  storage: storageUser,
+  ...multerOptions,
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.match(/image/)) {
+      return cb(
+        new SimpleError({
+          name: "invalid-type-mime",
+          message: "Invalid file type mime (only images are allowed)",
+        })
+      );
+    }
+
+    cb(null, true);
+  },
+});
 export const multerTaskMiddleware = multer({
   storage: storageTask,
   ...multerOptions,
@@ -80,6 +105,9 @@ export function constructMulterMiddleware(
     return (req: Request, res: Response, next: NextFunction) => {
       multer.single(fieldName)(req, res, (err) => {
         if (err) {
+          if (err instanceof SimpleError) {
+            return next(err);
+          }
           return next(new MulterError({ error: err, info: { maxFiles: 1 } }));
         }
 
