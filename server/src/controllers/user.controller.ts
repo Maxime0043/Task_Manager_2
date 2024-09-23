@@ -97,6 +97,11 @@ export async function info(req: Request, res: Response) {
     });
   }
 
+  // Generate the icon URL
+  if (user.icon) {
+    user.icon = await generatePresignedUrl(user.icon);
+  }
+
   return res.status(200).json({ user });
 }
 
