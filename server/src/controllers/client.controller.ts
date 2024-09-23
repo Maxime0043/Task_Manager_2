@@ -10,7 +10,6 @@ import { verifyIdIsUUID } from "../utils/joi_utils";
 import Project from "../db/models/project";
 import Task from "../db/models/task";
 import TaskFiles from "../db/models/task_files";
-import { deleteFile } from "../storage";
 
 export async function listAll(req: Request, res: Response) {
   const { name, email, deleted, limit, offset, orderBy, dir } = req.query;
@@ -226,29 +225,10 @@ export async function remove(req: Request, res: Response) {
 
   // Continue with the client removal process
   const transaction = await Client.sequelize?.transaction();
-  let filesToRemovePaths: string[] = [];
 
   try {
-    if (value.definitely === true) {
-      // Retrieve the files paths to remove
-      filesToRemovePaths = client.projects.reduce((acc: string[], project) => {
-        project.tasks.forEach((task) => {
-          acc.push(...task.files.map((file) => file.path));
-        });
-
-        return acc;
-      }, []);
-    }
-
     // Remove the client
     await client.destroy({ force: value.definitely === true, transaction });
-
-    // Delete the files from the storage
-    if (value.definitely === true) {
-      for (const path of filesToRemovePaths) {
-        await deleteFile(path);
-      }
-    }
 
     // Commit the transaction
     await transaction?.commit();

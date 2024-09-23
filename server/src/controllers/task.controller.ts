@@ -11,7 +11,6 @@ import User from "../db/models/user";
 import TaskUsers from "../db/models/task_users";
 import TaskFiles from "../db/models/task_files";
 import { deleteFile, generatePresignedUrl } from "../storage";
-import TaskScheduled from "../db/models/task_scheduled";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -474,24 +473,10 @@ export async function remove(req: Request, res: Response) {
 
   // Continue with the task removal process
   const transaction = await Task.sequelize?.transaction();
-  let filesToRemovePaths: string[] = [];
 
   try {
-    if (value.definitely === true) {
-      // Remove the files associated with the task
-      const files = await TaskFiles.findAll({ where: { taskId: task.id } });
-      filesToRemovePaths = files.map((file) => file.path);
-    }
-
     // Remove the task
     await task.destroy({ force: value.definitely === true, transaction });
-
-    // Delete the files from the storage
-    if (value.definitely === true) {
-      for (const path of filesToRemovePaths) {
-        await deleteFile(path);
-      }
-    }
 
     // Commit the transaction
     await transaction?.commit();

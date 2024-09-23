@@ -7,6 +7,7 @@ import db from "./db/models";
 
 // Import the API;
 import api from "./api";
+import "./ws";
 
 db.sequelize
   .authenticate()

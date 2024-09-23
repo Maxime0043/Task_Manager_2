@@ -7,6 +7,7 @@ import {
   BelongsTo,
   BelongsToMany,
   HasMany,
+  BeforeDestroy,
 } from "sequelize-typescript";
 
 import User from "./user";
@@ -15,6 +16,7 @@ import TaskStatus from "./task_status";
 import TaskUsers from "./task_users";
 import TaskFiles from "./task_files";
 import TaskScheduled from "./task_scheduled";
+import { deleteFile } from "../../storage";
 
 export const TASK_PRIORITIES = {
   HIGH: "high",
@@ -108,6 +110,21 @@ class Task extends Model {
 
   @HasMany(() => TaskScheduled, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   scheduled!: TaskScheduled[];
+
+  /**
+   * HOOKS
+   */
+
+  @BeforeDestroy
+  static async deleteFiles(instance: Task, options: any) {
+    if (!options.force) return;
+
+    const taskFiles = await instance.$get("files");
+
+    for (const file of taskFiles) {
+      await deleteFile(file.path);
+    }
+  }
 }
 
 export default Task;

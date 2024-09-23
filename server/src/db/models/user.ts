@@ -113,7 +113,11 @@ class User extends Model {
   @BeforeCreate
   @BeforeUpdate
   static async hashPassword(instance: User) {
-    // Hash the password
+    // Hash the password if it has been changed
+    if (!instance.isNewRecord && !instance.changed("password")) {
+      return;
+    }
+
     const salt = await bcrypt.genSalt(10);
     instance.password = await bcrypt.hash(instance.password, salt);
   }
