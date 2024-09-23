@@ -11,7 +11,7 @@ import MulterError from "../errors/MulterError";
 import { normalizeString } from "../utils/format";
 
 // Minio client
-const minioClient = new Client({
+export const minioClient = new Client({
   endPoint: process.env.MINIO_ENDPOINT!,
   port: process.env.MINIO_PORT ? parseInt(process.env.MINIO_PORT) : 9000,
   useSSL: false, // Permer d'utiliser le protocole HTTPS
@@ -49,7 +49,7 @@ const storageConversations = new MinioStorageEngine(
   process.env.MINIO_BUCKET!,
   {
     ...options,
-    path: "/uploads/tasks",
+    path: "/uploads/conversations",
   }
 );
 
