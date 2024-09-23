@@ -68,7 +68,3 @@ io.on("connection", (socket) => {
     }
   });
 });
-
-io.engine.on("connection_error", (err) => {
-  console.error(err);
-});
