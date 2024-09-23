@@ -23,7 +23,7 @@ module.exports = {
     emitOnErrors: false,
   },
   externals: [nodeExternals()],
-  watch: true,
+  // watch: true,
   target: "node",
   mode: "production", // development | production
 };

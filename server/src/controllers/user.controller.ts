@@ -8,6 +8,7 @@ import JoiError from "../errors/JoiError";
 import SequelizeError from "../errors/SequelizeError";
 import { verifyIdIsUUID } from "../utils/joi_utils";
 import { Op } from "sequelize";
+import { deleteFile, generatePresignedUrl } from "../storage";
 
 export async function listAll(req: Request, res: Response) {
   const {
@@ -79,6 +80,13 @@ export async function listAll(req: Request, res: Response) {
         : undefined,
   });
 
+  // Generate the icon URL for each user
+  for (const user of users) {
+    if (user.icon) {
+      user.icon = await generatePresignedUrl(user.icon);
+    }
+  }
+
   return res.status(200).json({ users });
 }
 
@@ -94,6 +102,11 @@ export async function info(req: Request, res: Response) {
       name: "not_found",
       message: "User not found",
     });
+  }
+
+  // Generate the icon URL
+  if (user.icon) {
+    user.icon = await generatePresignedUrl(user.icon);
   }
 
   return res.status(200).json({ user });
@@ -173,7 +186,6 @@ export async function update(req: Request, res: Response) {
         then: Joi.required(),
         otherwise: Joi.forbidden(),
       }),
-    icon: Joi.string().trim().uri().max(255),
     roleId: Joi.number().integer().min(1),
     isAdmin: Joi.boolean(),
   });
@@ -188,7 +200,19 @@ export async function update(req: Request, res: Response) {
   // Continue with the user update process
   try {
     // Update the user
-    const updatedUser = await user.update(value);
+    let updatedUser = await user.update(value);
+
+    // Delete the icon if it exists
+    if (updatedUser.icon) {
+      await deleteFile(user.icon);
+    }
+    // Update the icon if it exists
+    if (req.file) {
+      updatedUser = await user.update({ icon: req.file.path });
+
+      // Generate the icon URL
+      updatedUser.icon = await generatePresignedUrl(updatedUser.icon);
+    }
 
     return res.status(200).json({ user: updatedUser });
   } catch (err) {
@@ -276,8 +300,25 @@ export async function remove(req: Request, res: Response) {
     throw new JoiError({ error: errorParams, isUrlParam: true });
   }
 
+  // Retrieve the payload
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    definitely: Joi.boolean(),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
   // Find the user to delete
-  const user = await User.findByPk(id);
+  const user = await User.findByPk(id, {
+    paranoid: value.definitely === true ? false : undefined,
+  });
 
   if (!user) {
     throw new SimpleError({
@@ -288,12 +329,20 @@ export async function remove(req: Request, res: Response) {
   }
 
   // Continue with the user removal process
+  const transaction = await User.sequelize?.transaction();
+
   try {
     // Remove the user
-    await user.destroy();
+    await user.destroy({ force: value.definitely === true, transaction });
+
+    // Commit the transaction
+    await transaction?.commit();
 
     return res.sendStatus(200);
   } catch (err) {
+    // Rollback the transaction
+    await transaction?.rollback();
+
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
     }
