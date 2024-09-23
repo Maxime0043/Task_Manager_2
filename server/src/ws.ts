@@ -57,7 +57,12 @@ io.on("connection", (socket) => {
   });
 
   // Client disconnection
-  socket.on("disconnect", () => {});
+  socket.on("disconnect", () => {
+    // If the user is connected, delete the socket
+    if (socket.data.userId) {
+      delete userSockets[socket.data.userId];
+    }
+  });
 });
 
 io.engine.on("connection_error", (err) => {
