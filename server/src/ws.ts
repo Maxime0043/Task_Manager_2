@@ -10,7 +10,9 @@ import {
   InterServerEvents,
   ServerToClientEvents,
   SocketData,
+  UserSocket,
 } from "./websocket/utils/interfaces";
+import SocketError from "./websocket/errors/SocketError";
 
 // Define the WebSocket server
 export const io = new Server<
@@ -31,13 +33,35 @@ export const io = new Server<
 io.engine.use(helmet());
 io.engine.use(sessionMiddleware);
 
+// Relation between idUser and idSocket
+export const userSockets: Record<string, UserSocket> = {}; // { userId: {socket: socketId, room: room} }
+
+// Import middlewares
+import socketMiddleware from "./websocket/middlewares/index.middleware";
+
 // Websocket connection
 io.on("connection", (socket) => {
-  console.log("Client connected");
+  socketMiddleware(socket);
+
+  // Manage Error
+  socket.on("error", (err) => {
+    if (err instanceof SocketError) {
+      socket.emit("error", { error: err.error });
+    } else {
+      const myError = new SocketError({
+        event: "unknown",
+        name: "UnknownError",
+      });
+      socket.emit("error", { error: myError.error });
+    }
+  });
 
   // Client disconnection
   socket.on("disconnect", () => {
-    console.log("Client disconnected");
+    // If the user is connected, delete the socket
+    if (socket.data.userId) {
+      delete userSockets[socket.data.userId];
+    }
   });
 });
 
