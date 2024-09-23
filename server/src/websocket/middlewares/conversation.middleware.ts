@@ -42,8 +42,8 @@ export default function (socket: Socket) {
     // Verify if the user is part of the conversation
     if (
       conversation.conversationUsers &&
-      conversation.conversationUsers.aUserId !== socket.data.user.id &&
-      conversation.conversationUsers.bUserId !== socket.data.user.id
+      conversation.conversationUsers.aUserId !== socket.data.userId &&
+      conversation.conversationUsers.bUserId !== socket.data.userId
     ) {
       socket.data.conversationId = null;
 
