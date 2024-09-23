@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 dotenv.config();
 
 import express from "express";
+import { createServer } from "http";
 import helmet from "helmet";
 import cors from "cors";
 import "express-async-errors";
@@ -13,6 +14,7 @@ import db from "./db/models";
 
 // Define the express app
 const app = express();
+const httpServer = createServer(app);
 
 // Define the session store
 const SequelizeStore = connectMysql(Store);
@@ -30,30 +32,37 @@ declare module "express-session" {
   }
 }
 
+// Define the session middleware
+export const sessionMiddleware = session({
+  secret: process.env.SESSION_SECRET || "secret",
+  resave: false,
+  saveUninitialized: false,
+  store: store,
+  // proxy: false,
+  cookie: {
+    maxAge: 1000 * 60 * 60, // 1 hour
+    secure: true,
+    sameSite: "none",
+    httpOnly: false,
+    domain: process.env.SESSION_DOMAIN,
+  },
+});
+
+// Trust first proxy
+app.set("trust proxy", 1);
 // Define Helmet
 app.use(helmet());
 // Define CORS
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN,
+    origin: process.env.CORS_ORIGIN?.split(" "),
     credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS"],
+    preflightContinue: false,
   })
 );
 // Define the session
-app.use(
-  session({
-    secret: process.env.SESSION_SECRET || "secret",
-    resave: false,
-    saveUninitialized: false,
-    store: store,
-    proxy: true,
-    cookie: {
-      maxAge: 1000 * 60 * 60, // 1 hour
-      secure: false,
-    },
-  })
-);
+app.use(sessionMiddleware);
 // Define JSON as the default content type
 app.use(express.json());
 
@@ -68,4 +77,4 @@ import { errorHandler } from "./middlewares/errors.middleware";
 app.use(errorHandler);
 
 // Export the express app
-export default app;
+export default httpServer;
