@@ -2,8 +2,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
+import helmet from "helmet";
 import { Server } from "socket.io";
-import httpServer from "./api";
+import httpServer, { sessionMiddleware } from "./api";
 import {
   ClientToServerEvents,
   InterServerEvents,
@@ -25,6 +26,10 @@ export const io = new Server<
   },
   maxHttpBufferSize: 1e6, // 1MB
 });
+
+// Middleware
+io.engine.use(helmet());
+io.engine.use(sessionMiddleware);
 
 // Websocket connection
 io.on("connection", (socket) => {
