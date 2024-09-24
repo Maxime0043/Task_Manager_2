@@ -3,6 +3,7 @@ import express from "express";
 const router = express.Router();
 
 // Import Middlewares
+import { constructMulterMiddleware, multerUserMiddleware } from "../storage";
 
 // Import Controllers
 import {
@@ -40,8 +41,16 @@ router.post("/user_roles", createRole);
 router.put("/user_roles/:id", updateUserRole);
 router.delete("/user_roles/:id", removeUserRole);
 
-router.post("/users", createUser);
-router.put("/users/:id", updateUser);
+router.post(
+  "/users",
+  constructMulterMiddleware(multerUserMiddleware, "image"),
+  createUser
+);
+router.put(
+  "/users/:id",
+  constructMulterMiddleware(multerUserMiddleware, "image"),
+  updateUser
+);
 router.delete("/users/:id", removeUser);
 router.post("/users/restore/:id", restoreUser);
 

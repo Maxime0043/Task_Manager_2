@@ -45,7 +45,7 @@ class Client extends Model {
   @Column({
     type: DataType.UUID,
     allowNull: false,
-    onDelete: "CASCADE",
+    onDelete: "SET NULL",
     onUpdate: "CASCADE",
   })
   creatorId!: string;

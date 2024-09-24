@@ -39,9 +39,13 @@ export const userSockets: Record<string, UserSocket> = {}; // { userId: {socket:
 // Import middlewares
 import socketMiddleware from "./websocket/middlewares/index.middleware";
 
+// Import events
+import socketEvents from "./websocket/events/index.event";
+
 // Websocket connection
 io.on("connection", (socket) => {
   socketMiddleware(socket);
+  socketEvents(socket);
 
   // Manage Error
   socket.on("error", (err) => {
@@ -63,8 +67,4 @@ io.on("connection", (socket) => {
       delete userSockets[socket.data.userId];
     }
   });
-});
-
-io.engine.on("connection_error", (err) => {
-  console.error(err);
 });
