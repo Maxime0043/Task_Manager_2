@@ -194,3 +194,64 @@ export async function create(req: Request, res: Response) {
     throw err;
   }
 }
+
+export async function remove(req: Request, res: Response) {
+  const { conversationId, messageId } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params, [
+    "conversationId",
+    "messageId",
+  ]);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Verify that the conversation exists
+  const conversation = await Conversation.findByPk(conversationId);
+
+  if (!conversation) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Conversation not found",
+    });
+  }
+
+  // Retrieve the payload
+  const payload = req.body;
+
+  // Find the message to delete
+  const message = await Message.findByPk(messageId);
+
+  if (!message) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Message not found",
+    });
+  }
+
+  // Continue with the message removal process
+  const transaction = await Message.sequelize?.transaction();
+
+  try {
+    // Remove the message
+    await message.destroy({ transaction });
+
+    // Commit the transaction
+    await transaction?.commit();
+
+    return res.sendStatus(200);
+  } catch (err) {
+    // Rollback the transaction in case of error
+    await transaction?.rollback();
+
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}

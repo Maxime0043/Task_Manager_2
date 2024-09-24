@@ -3,13 +3,13 @@ import express from "express";
 const router = express.Router();
 
 // Import Middlewares
-
-// Import Controllers
-import { create, listAll } from "../controllers/message.controller";
 import {
   constructMulterMiddleware,
   multerConversationsMiddleware,
 } from "../storage";
+
+// Import Controllers
+import { create, listAll, remove } from "../controllers/message.controller";
 
 // Define the API routes
 router.get("/:id", listAll);
@@ -18,6 +18,7 @@ router.post(
   constructMulterMiddleware(multerConversationsMiddleware, "files", false, 4),
   create
 );
+router.delete("/:conversationId/:messageId", remove);
 
 // Export the router
 export default router;
