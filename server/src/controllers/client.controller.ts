@@ -99,7 +99,6 @@ export async function create(req: Request, res: Response) {
       .trim()
       .regex(/^(?:(?:\+|00)33|0)\s*[1-9](?:[\s.-]*\d{2}){4}$/),
     description: Joi.string().trim(),
-    creatorId: Joi.string().uuid({ version: "uuidv4" }).required(),
   });
 
   // Validate the payload
@@ -108,6 +107,9 @@ export async function create(req: Request, res: Response) {
   if (error) {
     throw new JoiError({ error });
   }
+
+  // Define the creatorId
+  value.creatorId = res.locals.userId;
 
   // Continue with the client creation process
   try {
