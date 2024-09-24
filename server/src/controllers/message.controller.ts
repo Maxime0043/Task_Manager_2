@@ -71,11 +71,19 @@ export async function listAll(req: Request, res: Response) {
     limit: parseInt(limit as string),
     offset: offset ? parseInt(offset as string) : undefined,
     order: [["createdAt", "DESC"]],
-    include: [User, MessageFiles],
+    include: [
+      { model: User, attributes: ["id", "lastName", "firstName", "icon"] },
+      MessageFiles,
+    ],
   });
 
-  // Generate the presigned URL for each file
   for (const message of messages) {
+    // Generate the presigned URL for the user icon
+    if (message?.user?.icon) {
+      message.user.icon = await generatePresignedUrl(message.user.icon);
+    }
+
+    // Generate the presigned URL for each file
     if (message.files) {
       for (const file of message.files) {
         file.path = await generatePresignedUrl(file.path);
