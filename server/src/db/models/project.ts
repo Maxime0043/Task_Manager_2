@@ -6,6 +6,7 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  BeforeDestroy,
 } from "sequelize-typescript";
 
 import User from "./user";
@@ -96,6 +97,19 @@ class Project extends Model {
 
   @HasMany(() => TaskScheduled, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   taskScheduled!: TaskScheduled[];
+
+  /**
+   * HOOKS
+   */
+
+  @BeforeDestroy
+  static async deleteTasks(instance: Project, options: any) {
+    if (!options.force) return;
+
+    for (const task of instance.tasks) {
+      await task.destroy({ force: true });
+    }
+  }
 }
 
 export default Project;

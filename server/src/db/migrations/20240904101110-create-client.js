@@ -30,7 +30,7 @@ module.exports = {
         type: Sequelize.TEXT,
       },
       creatorId: {
-        onDelete: "CASCADE",
+        onDelete: "SET NULL",
         onUpdate: "CASCADE",
         references: {
           model: "Users",

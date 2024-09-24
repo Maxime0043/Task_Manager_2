@@ -10,6 +10,7 @@ import {
   BelongsToMany,
   BeforeCreate,
   BeforeUpdate,
+  BeforeDestroy,
 } from "sequelize-typescript";
 import bcrypt from "bcrypt";
 
@@ -20,6 +21,7 @@ import Task from "./task";
 import TaskUsers from "./task_users";
 import TaskFiles from "./task_files";
 import TaskScheduled from "./task_scheduled";
+import { deleteFile } from "../../storage";
 
 @Table({
   modelName: "User",
@@ -69,7 +71,10 @@ class User extends Model {
   @BelongsTo(() => UserRoles)
   userRole!: UserRoles;
 
-  @HasMany(() => Client)
+  @HasMany(() => Client, {
+    onDelete: "SET NULL",
+    onUpdate: "CASCADE",
+  })
   clientsCreated!: Client[];
 
   @HasMany(() => Project, {
@@ -110,9 +115,22 @@ class User extends Model {
   @BeforeCreate
   @BeforeUpdate
   static async hashPassword(instance: User) {
-    // Hash the password
+    // Hash the password if it has been changed
+    if (!instance.isNewRecord && !instance.changed("password")) {
+      return;
+    }
+
     const salt = await bcrypt.genSalt(10);
     instance.password = await bcrypt.hash(instance.password, salt);
+  }
+
+  @BeforeDestroy
+  static async deleteImage(instance: User, options: any) {
+    if (!options.force) return;
+
+    if (instance.icon) {
+      await deleteFile(instance.icon);
+    }
   }
 }
 

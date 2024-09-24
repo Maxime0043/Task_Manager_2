@@ -48,6 +48,7 @@ export async function signup(req: Request, res: Response) {
 
     // Set the token in the session
     req.session.token = token;
+    req.session.save();
 
     return res.sendStatus(201);
   } catch (err) {
@@ -94,6 +95,7 @@ export async function signin(req: Request, res: Response) {
 
   // Set the token in the session
   req.session.token = token;
+  req.session.save();
 
   return res.sendStatus(200);
 }

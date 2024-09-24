@@ -252,8 +252,6 @@ describe(`POST ${url}`, () => {
       });
     const errors = res.body.errors;
 
-    console.log(errors);
-
     expect(res.status).toBe(409);
     expect(errors).toHaveLength(1);
     expect(errors[0].field).toBe("statusId");

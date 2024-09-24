@@ -77,7 +77,7 @@ describe(`POST ${url}/:id`, () => {
 
   it("should return 404 if the client is not found", async () => {
     const res = await supertest(app)
-      .post(`${urlWithoutId}/353f3f22-76df-4bf2-b3de-97f05ed30c3a`)
+      .post(`${urlWithoutId}/${crypto.randomUUID()}`)
       .set("Cookie", cookie);
 
     expect(res.status).toBe(404);
