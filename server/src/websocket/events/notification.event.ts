@@ -1,4 +1,5 @@
 import { Socket } from "socket.io";
+import { Op } from "sequelize";
 
 import { io, userSockets } from "../../ws";
 import Conversation from "../../db/models/conversation";
@@ -27,14 +28,13 @@ export default function (socket: Socket) {
       const participants = await Message.findAll({
         where: {
           conversationId,
+          userId: { [Op.ne]: userId, [Op.not]: null },
         },
         attributes: ["userId"],
         group: ["userId"],
       });
 
-      const participantIds = participants
-        .map((user) => user.userId)
-        .filter((id) => id !== userId);
+      const participantIds = participants.map((user) => user.userId);
 
       // Emit the event to the users
       for (const participantId of participantIds) {
