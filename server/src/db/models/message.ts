@@ -6,11 +6,13 @@ import {
   ForeignKey,
   BelongsTo,
   HasMany,
+  BeforeDestroy,
 } from "sequelize-typescript";
 
 import User from "./user";
 import Conversation from "./conversation";
 import MessageFiles from "./message_files";
+import { deleteFile } from "../../storage";
 
 @Table({
   modelName: "Message",
@@ -57,6 +59,19 @@ class Message extends Model {
 
   @HasMany(() => MessageFiles, { onDelete: "CASCADE", onUpdate: "CASCADE" })
   files!: MessageFiles[];
+
+  /**
+   * HOOKS
+   */
+
+  @BeforeDestroy
+  static async deleteFiles(instance: Message, options: any) {
+    const messageFiles = await instance.$get("files");
+
+    for (const file of messageFiles) {
+      await deleteFile(file.path);
+    }
+  }
 }
 
 export default Message;

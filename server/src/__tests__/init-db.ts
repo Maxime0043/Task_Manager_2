@@ -6,6 +6,10 @@ import Project from "../db/models/project";
 import Task from "../db/models/task";
 import TaskScheduled from "../db/models/task_scheduled";
 import User from "../db/models/user";
+import { cp } from "fs";
+import Conversation, { CONVERSATION_TYPE } from "../db/models/conversation";
+import ConversationUsers from "../db/models/conversation_users";
+import Message from "../db/models/message";
 
 export default async function initDB() {
   // Create the UserRoles
@@ -272,4 +276,54 @@ export async function populateTaskScheduled(userId: string, projectId: string) {
   }
 
   await TaskScheduled.bulkCreate(taskScheduled);
+}
+
+export async function populateConversations() {
+  // Create users
+  const userA = await User.create({
+    lastName: "UserA",
+    firstName: "User A",
+    email: "user.a@example.com",
+    password: "password",
+    passwordConfirmation: "password",
+    roleId: 1,
+  });
+  const userB = await User.create({
+    lastName: "UserB",
+    firstName: "User B",
+    email: "user.b@example.com",
+    password: "password",
+    passwordConfirmation: "password",
+    roleId: 1,
+  });
+
+  // Create a conversation
+  const conversation = await Conversation.create({
+    name: "Conversation",
+    type: CONVERSATION_TYPE.USER,
+  });
+
+  // Create the conversation users
+  const conversationUsers = await ConversationUsers.create({
+    id: conversation.id,
+    aUserId: userA.id,
+    bUserId: userB.id,
+  });
+
+  // Create messages
+  const messages = [];
+
+  for (let i = 1; i <= 20; i++) {
+    messages.push({
+      content: `Message ${i}`,
+      userId: Math.random() <= 0.5 ? userA.id : userB.id,
+      conversationId: conversationUsers.id,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
+  }
+
+  await Message.bulkCreate(messages);
+
+  return conversation;
 }
