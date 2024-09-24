@@ -3,35 +3,14 @@ import { BaseError, Op } from "sequelize";
 import Joi from "joi";
 
 import JoiError from "../errors/JoiError";
-import SimpleError from "../errors/SimpleError";
 import SequelizeError from "../errors/SequelizeError";
-import { verifyIdIsUUID } from "../utils/joi_utils";
 import User from "../db/models/user";
 import Message from "../db/models/message";
 import MessageFiles from "../db/models/message_files";
-import { deleteFile, generatePresignedUrl } from "../storage";
-import Conversation from "../db/models/conversation";
+import { generatePresignedUrl } from "../storage";
 
 export async function listAll(req: Request, res: Response) {
   const { id: conversationId } = req.params;
-
-  // Validate the params
-  const errorParams = verifyIdIsUUID(req.params);
-
-  if (errorParams) {
-    throw new JoiError({ error: errorParams, isUrlParam: true });
-  }
-
-  // Verify that the conversation exists
-  const conversation = await Conversation.findByPk(conversationId);
-
-  if (!conversation) {
-    throw new SimpleError({
-      statusCode: 404,
-      name: "not_found",
-      message: "Conversation not found",
-    });
-  }
 
   // Validate the query params
   const { before, after, limit, offset } = req.query;
@@ -96,25 +75,6 @@ export async function listAll(req: Request, res: Response) {
 
 export async function create(req: Request, res: Response) {
   const { id: conversationId } = req.params;
-
-  // Validate the params
-  const errorParams = verifyIdIsUUID(req.params);
-
-  if (errorParams) {
-    throw new JoiError({ error: errorParams, isUrlParam: true });
-  }
-
-  // Verify that the conversation exists
-  const conversation = await Conversation.findByPk(conversationId);
-
-  if (!conversation) {
-    throw new SimpleError({
-      statusCode: 404,
-      name: "not_found",
-      message: "Conversation not found",
-    });
-  }
-
   const payload = req.body;
 
   // Create JOI Schema to validate the payload
@@ -196,49 +156,17 @@ export async function create(req: Request, res: Response) {
 }
 
 export async function remove(req: Request, res: Response) {
-  const { conversationId, messageId } = req.params;
-
-  // Validate the params
-  const errorParams = verifyIdIsUUID(req.params, [
-    "conversationId",
-    "messageId",
-  ]);
-
-  if (errorParams) {
-    throw new JoiError({ error: errorParams, isUrlParam: true });
-  }
-
-  // Verify that the conversation exists
-  const conversation = await Conversation.findByPk(conversationId);
-
-  if (!conversation) {
-    throw new SimpleError({
-      statusCode: 404,
-      name: "not_found",
-      message: "Conversation not found",
-    });
-  }
-
-  // Retrieve the payload
-  const payload = req.body;
+  const { messageId } = req.params;
 
   // Find the message to delete
   const message = await Message.findByPk(messageId);
-
-  if (!message) {
-    throw new SimpleError({
-      statusCode: 404,
-      name: "not_found",
-      message: "Message not found",
-    });
-  }
 
   // Continue with the message removal process
   const transaction = await Message.sequelize?.transaction();
 
   try {
     // Remove the message
-    await message.destroy({ transaction });
+    await message!.destroy({ transaction });
 
     // Commit the transaction
     await transaction?.commit();
