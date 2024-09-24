@@ -130,7 +130,6 @@ export async function create(req: Request, res: Response) {
       .max(16)
       .valid(Joi.ref("password"))
       .required(),
-    icon: Joi.string().trim().uri().max(255),
     roleId: Joi.number().integer().min(1).required(),
     isAdmin: Joi.boolean().required(),
   });
@@ -144,7 +143,15 @@ export async function create(req: Request, res: Response) {
 
   // Continue with the user creation process
   try {
-    const user = await User.create(value);
+    let user = await User.create(value);
+
+    // Update the icon if it exists
+    if (req.file) {
+      user = await user.update({ icon: req.file.path });
+
+      // Generate the icon URL
+      user.icon = await generatePresignedUrl(user.icon);
+    }
 
     // Remove the password from the response
     const { password, ...userWithoutPassword } = user.toJSON();
@@ -219,7 +226,10 @@ export async function update(req: Request, res: Response) {
       updatedUser.icon = await generatePresignedUrl(updatedUser.icon);
     }
 
-    return res.status(200).json({ user: updatedUser });
+    // Remove the password from the response
+    const { password, ...userWithoutPassword } = updatedUser.toJSON();
+
+    return res.status(200).json({ user: userWithoutPassword });
   } catch (err) {
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
@@ -268,7 +278,6 @@ export async function updateOther(req: Request, res: Response) {
         then: Joi.required(),
         otherwise: Joi.forbidden(),
       }),
-    icon: Joi.string().trim().uri().max(255),
     roleId: Joi.number().integer().min(1),
     isAdmin: Joi.boolean(),
   });
@@ -283,9 +292,24 @@ export async function updateOther(req: Request, res: Response) {
   // Continue with the user update process
   try {
     // Update the user
-    const updatedUser = await user.update(value);
+    let updatedUser = await user.update(value);
 
-    return res.status(200).json({ user: updatedUser });
+    // Delete the icon if it exists
+    if (updatedUser.icon) {
+      await deleteFile(user.icon);
+    }
+    // Update the icon if it exists
+    if (req.file) {
+      updatedUser = await user.update({ icon: req.file.path });
+
+      // Generate the icon URL
+      updatedUser.icon = await generatePresignedUrl(updatedUser.icon);
+    }
+
+    // Remove the password from the response
+    const { password, ...userWithoutPassword } = updatedUser.toJSON();
+
+    return res.status(200).json({ user: userWithoutPassword });
   } catch (err) {
     if (err instanceof BaseError) {
       throw new SequelizeError({ statusCode: 409, error: err });
