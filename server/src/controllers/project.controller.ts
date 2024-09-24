@@ -124,7 +124,6 @@ export async function create(req: Request, res: Response) {
     isInternalProject: Joi.boolean().required(),
     managerId: Joi.string().uuid({ version: "uuidv4" }).required(),
     clientId: Joi.string().uuid({ version: "uuidv4" }).required(),
-    creatorId: Joi.string().uuid({ version: "uuidv4" }).required(),
   });
 
   // Validate the payload
@@ -133,6 +132,9 @@ export async function create(req: Request, res: Response) {
   if (error) {
     throw new JoiError({ error });
   }
+
+  // Define the creatorId
+  value.creatorId = res.locals.userId;
 
   // Continue with the project creation process
   try {

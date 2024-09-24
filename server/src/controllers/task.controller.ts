@@ -152,7 +152,6 @@ export async function create(req: Request, res: Response) {
       .valid(...Object.values(TASK_PRIORITIES)),
     position: Joi.number().integer().min(0),
     projectId: Joi.string().uuid({ version: "uuidv4" }).required(),
-    creatorId: Joi.string().uuid({ version: "uuidv4" }).required(),
     usersAssigned: Joi.array()
       .items(Joi.string().uuid({ version: "uuidv4" }))
       .min(1)
@@ -165,6 +164,9 @@ export async function create(req: Request, res: Response) {
   if (error) {
     throw new JoiError({ error });
   }
+
+  // Define the creatorId
+  value.creatorId = res.locals.userId;
 
   // Format the users assigned to the task
   const usersAssigned = value.usersAssigned;

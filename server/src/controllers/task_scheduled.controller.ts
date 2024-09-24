@@ -147,7 +147,6 @@ export async function create(req: Request, res: Response) {
       then: Joi.forbidden(),
       otherwise: Joi.required(),
     }),
-    userId: Joi.string().uuid({ version: "uuidv4" }).required(),
   });
 
   // Validate the payload
@@ -156,6 +155,9 @@ export async function create(req: Request, res: Response) {
   if (error) {
     throw new JoiError({ error });
   }
+
+  // Define the userId
+  value.userId = res.locals.userId;
 
   // Continue with the taskScheduled creation process
   try {
