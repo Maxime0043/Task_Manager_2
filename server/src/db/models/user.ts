@@ -86,14 +86,14 @@ class User extends Model {
 
   @HasMany(() => Project, {
     foreignKey: "creatorId",
-    onDelete: "CASCADE",
+    onDelete: "SET NULL",
     onUpdate: "CASCADE",
   })
   projectsCreated!: Project[];
 
   @HasMany(() => Task, {
     foreignKey: "creatorId",
-    onDelete: "CASCADE",
+    onDelete: "SET NULL",
     onUpdate: "CASCADE",
   })
   tasksCreated!: Task[];
@@ -101,7 +101,7 @@ class User extends Model {
   @BelongsToMany(() => Task, () => TaskUsers, "userId", "taskId")
   tasksAssigned!: Task[];
 
-  @HasMany(() => TaskFiles, { onDelete: "CASCADE", onUpdate: "CASCADE" })
+  @HasMany(() => TaskFiles, { onDelete: "SET NULL", onUpdate: "CASCADE" })
   filesAddedToTasks!: TaskFiles[];
 
   @HasMany(() => TaskScheduled, { onDelete: "CASCADE", onUpdate: "CASCADE" })
