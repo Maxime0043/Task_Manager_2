@@ -85,3 +85,104 @@ export async function listAll(req: Request, res: Response) {
 
   return res.status(200).json({ messages });
 }
+
+export async function create(req: Request, res: Response) {
+  const { id: conversationId } = req.params;
+
+  // Validate the params
+  const errorParams = verifyIdIsUUID(req.params);
+
+  if (errorParams) {
+    throw new JoiError({ error: errorParams, isUrlParam: true });
+  }
+
+  // Verify that the conversation exists
+  const conversation = await Conversation.findByPk(conversationId);
+
+  if (!conversation) {
+    throw new SimpleError({
+      statusCode: 404,
+      name: "not_found",
+      message: "Conversation not found",
+    });
+  }
+
+  const payload = req.body;
+
+  // Create JOI Schema to validate the payload
+  const schema = Joi.object({
+    content: Joi.string().trim().allow(null, ""),
+  });
+
+  // Validate the payload
+  const { value, error } = schema.validate(payload, { abortEarly: false });
+
+  if (error) {
+    throw new JoiError({ error });
+  }
+
+  // Define content
+  if (!value.content) {
+    value.content = "";
+  }
+
+  // Define the userId and conversationId
+  value.userId = res.locals.userId;
+  value.conversationId = conversationId;
+
+  // Continue with the message creation process
+  const transaction = await Message.sequelize?.transaction();
+
+  try {
+    // Create a new message
+    let message = await Message.create(value, { transaction });
+
+    // Create the message files if they exist
+    if (req.files) {
+      for (const file of req.files as Express.Multer.File[]) {
+        await MessageFiles.create(
+          {
+            path: file.path,
+            messageId: message.id,
+          },
+          { transaction }
+        );
+      }
+    }
+
+    // Retrieve the message with the user and files
+    message = await message.reload({
+      include: [
+        { model: User, attributes: ["lastName", "firstName", "icon"] },
+        MessageFiles,
+      ],
+      transaction,
+    });
+
+    // Generate the presigned URL for the user icon
+    if (message?.user?.icon) {
+      message.user.icon = await generatePresignedUrl(message.user.icon);
+    }
+
+    // Generate the presigned URL for each file
+    if (message.files) {
+      for (const file of message.files) {
+        file.path = await generatePresignedUrl(file.path);
+      }
+    }
+
+    // Commit the transaction
+    await transaction?.commit();
+
+    return res.status(201).json({ message });
+  } catch (err) {
+    // Rollback the transaction
+    await transaction?.rollback();
+
+    if (err instanceof BaseError) {
+      throw new SequelizeError({ statusCode: 409, error: err });
+    }
+
+    throw err;
+  }
+}
