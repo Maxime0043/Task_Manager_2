@@ -83,7 +83,7 @@ class Task extends Model {
   @ForeignKey(() => User)
   @Column({
     type: DataType.UUID,
-    allowNull: false,
+    allowNull: true,
     onDelete: "SET NULL",
     onUpdate: "CASCADE",
   })
