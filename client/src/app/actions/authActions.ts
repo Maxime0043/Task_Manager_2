@@ -1,22 +1,29 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
+
+interface InfoUserResponse {
+  user: Record<string, null | string | number | boolean>;
+}
 
 export const signinUser = createAsyncThunk(
   "auth/signin",
   (data: { email: string; password: string }) => {
-    return fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/signin`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    });
+    return axios.post(
+      `${import.meta.env.VITE_API_URL}/api/v1/auth/signin`,
+      data,
+      {
+        withCredentials: true,
+      }
+    );
   }
 );
 
 export const signoutUser = createAsyncThunk("auth/signout", () => {
-  return fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/signout`, {
-    method: "POST",
-    credentials: "include",
-  });
+  return axios.post(
+    `${import.meta.env.VITE_API_URL}/api/v1/auth/signout`,
+    {},
+    {
+      withCredentials: true,
+    }
+  );
 });
