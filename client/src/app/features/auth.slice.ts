@@ -67,7 +67,11 @@ export const authSlice = createSlice({
           icon: null,
         };
 
-        Cookies.remove("connect.sid");
+        Cookies.remove("connect.sid", {
+          secure: true,
+          sameSite: "none",
+          domain: import.meta.env.VITE_COOKIE_DOMAIN,
+        });
       })
       .addCase(signoutUser.rejected, (state, action) => {
         state.loading = false;
@@ -88,14 +92,16 @@ export const authSlice = createSlice({
         state.user.firstName = action.payload.user.firstName as string;
         state.user.lastName = action.payload.user.lastName as string;
         state.user.icon = action.payload.user.icon as string | null;
-
-        Cookies.remove("connect.sid");
       })
-      .addCase(infoUser.rejected, (state, action) => {
+      .addCase(infoUser.rejected, (state) => {
         state.loading = false;
-        state.error = action.error.message as string;
+        // state.error = action.error.message as string;
 
-        Cookies.remove("connect.sid");
+        Cookies.remove("connect.sid", {
+          secure: true,
+          sameSite: "none",
+          domain: import.meta.env.VITE_COOKIE_DOMAIN,
+        });
       });
   },
 });

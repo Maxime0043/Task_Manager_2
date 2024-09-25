@@ -22,13 +22,8 @@ function AuthGuard({
   const [isLogged, setIsLogged] = useState(false);
 
   useEffect(() => {
-    const fetchUser = async () => {
-      await dispatch(infoUser()).unwrap();
-
-      setIsLogged(!!userSid);
-    };
-
-    fetchUser();
+    dispatch(infoUser());
+    setIsLogged(!!userSid);
   }, [userSid, dispatch]);
 
   return (
