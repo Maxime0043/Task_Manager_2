@@ -27,3 +27,11 @@ export const signoutUser = createAsyncThunk("auth/signout", () => {
     }
   );
 });
+
+export const infoUser = createAsyncThunk<InfoUserResponse>("auth/info", () => {
+  return axios
+    .get(`${import.meta.env.VITE_API_URL}/api/v1/users/info`, {
+      withCredentials: true,
+    })
+    .then((response) => response.data);
+});

@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { signinUser, signoutUser } from "../actions/authActions";
+import { infoUser, signinUser, signoutUser } from "../actions/authActions";
 import Cookies from "js-cookie";
 
 export type InitialStateType = {
@@ -42,15 +42,10 @@ export const authSlice = createSlice({
           icon: null,
         };
       })
-      .addCase(signinUser.fulfilled, (state, action) => {
-        if (action.payload.status !== 200) {
-          state.loading = false;
-          state.error = action.payload.statusText;
-        } else {
-          state.loading = false;
-          state.success = true;
-          state.userSid = Cookies.get("connect.sid") ?? null;
-        }
+      .addCase(signinUser.fulfilled, (state) => {
+        state.loading = false;
+        state.success = true;
+        state.userSid = Cookies.get("connect.sid") ?? null;
       })
       .addCase(signinUser.rejected, (state, action) => {
         state.loading = false;
@@ -71,10 +66,36 @@ export const authSlice = createSlice({
           firstName: null,
           icon: null,
         };
+
+        Cookies.remove("connect.sid");
       })
       .addCase(signoutUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message as string;
+      })
+
+      // Info
+      .addCase(infoUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = false;
+      })
+      .addCase(infoUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.userSid = Cookies.get("connect.sid") ?? null;
+
+        state.user.firstName = action.payload.user.firstName as string;
+        state.user.lastName = action.payload.user.lastName as string;
+        state.user.icon = action.payload.user.icon as string | null;
+
+        Cookies.remove("connect.sid");
+      })
+      .addCase(infoUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message as string;
+
+        Cookies.remove("connect.sid");
       });
   },
 });
