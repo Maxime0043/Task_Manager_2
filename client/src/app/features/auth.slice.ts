@@ -1,5 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { signinUser } from "../actions/authActions";
+import { signinUser, signoutUser } from "../actions/authActions";
 import Cookies from "js-cookie";
 
 export type InitialStateType = {
@@ -53,6 +53,26 @@ export const authSlice = createSlice({
         }
       })
       .addCase(signinUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message as string;
+      })
+
+      // Signout
+      .addCase(signoutUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = false;
+      })
+      .addCase(signoutUser.fulfilled, (state) => {
+        state.loading = false;
+        state.userSid = null;
+        state.user = {
+          lastName: null,
+          firstName: null,
+          icon: null,
+        };
+      })
+      .addCase(signoutUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message as string;
       });

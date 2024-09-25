@@ -13,3 +13,10 @@ export const signinUser = createAsyncThunk(
     });
   }
 );
+
+export const signoutUser = createAsyncThunk("auth/signout", () => {
+  return fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/signout`, {
+    method: "POST",
+    credentials: "include",
+  });
+});
