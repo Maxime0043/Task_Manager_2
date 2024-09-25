@@ -1,7 +1,8 @@
 import { ReactNode, ElementType, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../app/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../app/store";
+import { infoUser } from "../app/actions/authActions";
 
 interface Props {
   Element: ElementType;
@@ -17,11 +18,18 @@ function AuthGuard({
   needToBeLoggedOut = false,
 }: Props) {
   const { userSid } = useSelector((state: RootState) => state.auth);
+  const dispatch: AppDispatch = useDispatch();
   const [isLogged, setIsLogged] = useState(false);
 
   useEffect(() => {
-    setIsLogged(!!userSid);
-  }, [userSid]);
+    const fetchUser = async () => {
+      await dispatch(infoUser()).unwrap();
+
+      setIsLogged(!!userSid);
+    };
+
+    fetchUser();
+  }, [userSid, dispatch]);
 
   return (
     <>
