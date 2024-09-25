@@ -1,50 +1,47 @@
-import { useState } from "react";
+import { FieldValues, useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState, AppDispatch } from "../app/store";
+import { signinUser } from "../app/actions/authActions";
+
+interface DataType extends FieldValues {
+  email: string;
+  password: string;
+}
 
 function Signin() {
-  const [showError, setShowError] = useState(false);
+  const { error, success } = useSelector((state: RootState) => state.auth);
+  const dispatch: AppDispatch = useDispatch();
+  const { register: signin, handleSubmit } = useForm<DataType>();
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    setShowError(false);
+  function handleSignin(data: DataType) {
+    // Validate data here
+    if (!data.email || !data.password) {
+      window.alert("Veuillez remplir tous les champs!");
+      return;
+    }
 
-    const form = event.currentTarget;
-    const formData = new FormData(form);
-    const data = Object.fromEntries(formData.entries());
+    // Set email in lowercase
+    data.email = data.email.toLowerCase();
 
-    fetch(`${import.meta.env.VITE_API_URL}/api/v1/auth/signin`, {
-      method: "POST",
-      credentials: "include",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    })
-      .then((response) => {
-        if (response.status !== 200) {
-          setShowError(true);
-        }
-      })
-      .catch((error) => {
-        console.error(error);
-        setShowError(true);
-      });
+    dispatch(signinUser(data));
   }
 
   return (
     <div>
       <h1>Se Connecter</h1>
 
-      {showError && <p>Email ou mot de passe incorrect!</p>}
+      {success && <p>Vous êtes connecté!</p>}
+      {error && <p>Email ou mot de passe incorrect!</p>}
 
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(handleSignin)}>
         <label>
           Email:
-          <input type="email" name="email" />
+          <input type="email" {...signin("email")} />
         </label>
 
         <label>
           Mot de passe:
-          <input type="password" name="password" />
+          <input type="password" {...signin("password")} />
         </label>
 
         <button type="submit">Connexion</button>
