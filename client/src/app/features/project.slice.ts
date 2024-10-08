@@ -40,8 +40,17 @@ export const projectSlice = createSlice({
       .addCase(listProjects.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
-        state.projects = action.payload
-          .projects as InitialStateType["projects"];
+
+        // If the offset is 0, we reset the projects array
+        if (action.meta.arg.offset === 0) {
+          state.projects = action.payload
+            .projects as InitialStateType["projects"];
+        } else {
+          state.projects = [
+            ...state.projects,
+            ...(action.payload.projects as InitialStateType["projects"]),
+          ];
+        }
       })
       .addCase(listProjects.rejected, (state, action) => {
         state.loading = false;
