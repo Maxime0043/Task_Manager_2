@@ -1,7 +1,10 @@
+import { useId } from "react";
 import { FieldValues, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState, AppDispatch } from "../app/store";
 import { signinUser } from "../app/actions/authActions";
+
+import logo from "../assets/logo-1.svg";
 
 interface DataType extends FieldValues {
   email: string;
@@ -12,6 +15,8 @@ function Signin() {
   const { error, success } = useSelector((state: RootState) => state.auth);
   const dispatch: AppDispatch = useDispatch();
   const { register: signin, handleSubmit } = useForm<DataType>();
+  const emailId = useId();
+  const passwordId = useId();
 
   function handleSignin(data: DataType) {
     // Validate data here
@@ -27,25 +32,29 @@ function Signin() {
   }
 
   return (
-    <div>
-      <h1>Se Connecter</h1>
+    <div id="ctn-signin">
+      <img src={logo} id="signin-logo" alt="Logo" />
 
-      {success && <p>Vous êtes connecté!</p>}
-      {error && <p>Email ou mot de passe incorrect!</p>}
+      <div id="signin-box">
+        <h1>Se Connecter</h1>
 
-      <form onSubmit={handleSubmit(handleSignin)}>
-        <label>
-          Email:
-          <input type="email" {...signin("email")} />
-        </label>
+        {success && <p>Vous êtes connecté!</p>}
+        {error && <p>Email ou mot de passe incorrect!</p>}
 
-        <label>
-          Mot de passe:
-          <input type="password" {...signin("password")} />
-        </label>
+        <form id="signin-form" onSubmit={handleSubmit(handleSignin)}>
+          <div>
+            <label htmlFor={emailId}>Email:</label>
+            <input type="email" id={emailId} {...signin("email")} />
+          </div>
 
-        <button type="submit">Connexion</button>
-      </form>
+          <div>
+            <label htmlFor={passwordId}>Mot de passe:</label>
+            <input type="password" id={passwordId} {...signin("password")} />
+          </div>
+
+          <button type="submit">Connexion</button>
+        </form>
+      </div>
     </div>
   );
 }
