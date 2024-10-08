@@ -68,4 +68,20 @@
       }
     }
   }
+
+  @media screen and (max-height: 860px) {
+    #signin-logo {
+      position: relative;
+      width: 200px;
+      height: auto;
+    }
+
+    #signin-box {
+      position: relative;
+      top: auto;
+      left: auto;
+      transform: none;
+      margin: 40px auto;
+    }
+  }
 }
