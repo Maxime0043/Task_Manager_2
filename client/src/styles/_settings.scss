@@ -1,3 +1,33 @@
+@font-face {
+  font-family: "Signika Regular";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Signika Regular"),
+    url("./font/Signika-Regular.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Signika Light";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Signika Light"), url("./font/Signika-Light.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Signika SemiBold";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Signika SemiBold"),
+    url("./font/Signika-SemiBold.woff") format("woff");
+}
+
+@font-face {
+  font-family: "Signika Bold";
+  font-style: normal;
+  font-weight: normal;
+  src: local("Signika Bold"), url("./font/Signika-Bold.woff") format("woff");
+}
+
 $bg-main: #fff;
 $bg-secondary: #fcfcfc;
 
@@ -58,4 +88,7 @@ $color-error-3: #e04f44;
   outline: none;
   border: none;
   text-decoration: none;
+  font-family: "Signika Regular", sans-serif;
+  font-size: 16px;
+  color: $color-black-0;
 }
