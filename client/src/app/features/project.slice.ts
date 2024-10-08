@@ -1,4 +1,5 @@
 import { createSlice } from "@reduxjs/toolkit";
+import { listProjects } from "../actions/projectActions";
 
 export type InitialStateType = {
   loading: boolean;
@@ -28,7 +29,28 @@ export const projectSlice = createSlice({
     projects: [],
   } as InitialStateType,
   reducers: {},
-  extraReducers: () => {},
+  extraReducers: (builder) => {
+    builder
+      // List projects
+      .addCase(listProjects.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+        state.success = false;
+      })
+      .addCase(listProjects.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.projects = action.payload
+          .projects as InitialStateType["projects"];
+      })
+      .addCase(listProjects.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message as string;
+        state.projects = [];
+
+        console.log(action.error);
+      });
+  },
 });
 
 export default projectSlice.reducer;
