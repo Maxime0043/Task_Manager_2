@@ -1,4 +1,6 @@
 import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { RootState } from "./app/store";
+import { useSelector } from "react-redux";
 import Page404 from "./pages/Page404";
 import Home from "./pages/Home";
 import Signin from "./pages/Signin";
@@ -6,10 +8,12 @@ import AuthGuard from "./components/AuthGuard";
 import NavBar from "./components/NavBar";
 
 function App() {
+  const { userSid } = useSelector((state: RootState) => state.auth);
+
   return (
     <BrowserRouter>
       <div id="ctn-task-manager">
-        <NavBar />
+        {userSid && <NavBar />}
 
         <div id="ctn-view">
           <Routes>
