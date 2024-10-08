@@ -1,0 +1,30 @@
+.form-messages {
+  display: block;
+  margin: 20px 0;
+  list-style-type: none;
+
+  &.form-messages-hidden {
+    display: none;
+  }
+
+  .form-message-error {
+    padding: 8px;
+    border: solid 3px $color-error-3;
+    background-color: $color-error-1;
+    color: $color-error-2;
+
+    &:first-child {
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+    }
+
+    &:last-child {
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+
+    & + .form-message-error {
+      border-top: none;
+    }
+  }
+}

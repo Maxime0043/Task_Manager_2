@@ -38,8 +38,20 @@ function Signin() {
       <div id="signin-box">
         <h1>Se Connecter</h1>
 
-        {success && <p>Vous êtes connecté!</p>}
-        {error && <p>Email ou mot de passe incorrect!</p>}
+        <ul
+          className={
+            "form-messages" + (error || success ? "" : "form-messages-hidden")
+          }
+        >
+          {error && (
+            <li className="form-message-error">
+              Votre email ou mot de passe est incorrect!
+            </li>
+          )}
+          {success && (
+            <li className="form-message-success">Vous êtes connecté!</li>
+          )}
+        </ul>
 
         <form id="signin-form" onSubmit={handleSubmit(handleSignin)}>
           <div>
