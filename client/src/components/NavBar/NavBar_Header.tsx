@@ -3,6 +3,10 @@ import { AppDispatch, RootState } from "../../app/store";
 import { signoutUser } from "../../app/actions/authActions";
 import { NavLink } from "react-router-dom";
 
+import { FaCircleUser } from "react-icons/fa6";
+import { RiSettings4Fill } from "react-icons/ri";
+import { IoLogOut } from "react-icons/io5";
+
 function NavBar_Header() {
   const { user } = useSelector((state: RootState) => state.auth);
   const dispatch: AppDispatch = useDispatch();
@@ -13,14 +17,16 @@ function NavBar_Header() {
 
   return (
     <div id="navigation-header">
-      <img
-        src={
-          user.icon || "https://www.svgrepo.com/show/415663/basic-help-ui.svg"
-        }
-        id="navigation-header-logo"
-        alt="Logo"
-        height={50}
-      />
+      {user.icon ? (
+        <img
+          src={user.icon}
+          id="navigation-header-logo"
+          alt="Logo"
+          height={50}
+        />
+      ) : (
+        <FaCircleUser id="navigation-header-logo" />
+      )}
 
       <p id="navigation-header-user">
         {user.firstName} {user.lastName?.toUpperCase()}
@@ -30,19 +36,12 @@ function NavBar_Header() {
         <NavLink
           to="/"
           className={({ isActive }) => (isActive ? "navigation-active" : "")}
+          title="Options"
         >
-          <img
-            src="https://www.svgrepo.com/show/526221/settings.svg"
-            alt="Options"
-            height={30}
-          />
+          <RiSettings4Fill />
         </NavLink>
         <button id="navigation-header-signout" onClick={signout}>
-          <img
-            src="https://www.svgrepo.com/show/507358/logout.svg"
-            alt="Se déconnecter"
-            height={30}
-          />
+          <IoLogOut title="Se déconnecter" />
         </button>
       </div>
     </div>
