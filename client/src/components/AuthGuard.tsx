@@ -17,7 +17,7 @@ function AuthGuard({
   verification,
   needToBeLoggedOut = false,
 }: Props) {
-  const { userSid } = useSelector((state: RootState) => state.auth);
+  const { loading, userSid } = useSelector((state: RootState) => state.auth);
   const dispatch: AppDispatch = useDispatch();
   const [isLogged, setIsLogged] = useState(false);
 
@@ -28,7 +28,9 @@ function AuthGuard({
 
   return (
     <>
-      {needToBeLoggedOut && isLogged ? (
+      {loading && !needToBeLoggedOut ? (
+        <p>Loading...</p>
+      ) : needToBeLoggedOut && isLogged ? (
         <Navigate to="/" replace />
       ) : !verification || isLogged ? (
         children ? (

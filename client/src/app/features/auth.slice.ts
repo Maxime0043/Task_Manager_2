@@ -8,6 +8,7 @@ export type InitialStateType = {
   success: boolean;
   userSid: null | string;
   user: {
+    id: null | string;
     lastName: null | string;
     firstName: null | string;
     icon: null | string;
@@ -22,6 +23,7 @@ export const authSlice = createSlice({
     success: false, // This is used to display a success message to the user
     userSid: null,
     user: {
+      id: null,
       lastName: null,
       firstName: null,
       icon: null,
@@ -37,6 +39,7 @@ export const authSlice = createSlice({
         state.success = false;
         state.userSid = null;
         state.user = {
+          id: null,
           lastName: null,
           firstName: null,
           icon: null,
@@ -62,6 +65,7 @@ export const authSlice = createSlice({
         state.loading = false;
         state.userSid = null;
         state.user = {
+          id: null,
           lastName: null,
           firstName: null,
           icon: null,
@@ -89,6 +93,7 @@ export const authSlice = createSlice({
         state.success = true;
         state.userSid = Cookies.get("connect.sid") ?? null;
 
+        state.user.id = action.payload.user.id as string;
         state.user.firstName = action.payload.user.firstName as string;
         state.user.lastName = action.payload.user.lastName as string;
         state.user.icon = action.payload.user.icon as string | null;
