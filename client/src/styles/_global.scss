@@ -1,3 +1,18 @@
+#ctn-task-manager {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  align-items: flex-start;
+  width: 100vw;
+  height: 100vh;
+
+  #ctn-view {
+    flex: 1 1 0;
+    height: 100%;
+    overflow: auto;
+  }
+}
+
 .form-messages {
   display: block;
   margin: 20px 0;

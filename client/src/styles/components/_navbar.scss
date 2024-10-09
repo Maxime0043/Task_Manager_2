@@ -1,0 +1,131 @@
+#ctn-navigation {
+  display: flex;
+  flex-direction: column;
+  width: 350px;
+  height: 100%;
+  overflow: auto;
+  background-color: $color-grey-6;
+  border-right: solid 2px $color-grey-4;
+
+  & > * + * {
+    border-top: solid 2px $color-grey-4;
+  }
+
+  #navigation-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 10px 20px;
+
+    & > * + * {
+      margin-left: 10px;
+    }
+
+    #navigation-header-logo {
+      width: auto;
+      height: 45px;
+      border: solid 1px $color-black-0;
+      border-radius: 50%;
+    }
+
+    #navigation-header-user {
+      flex: 1 1 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-family: "Signika SemiBold", sans-serif;
+      font-size: 1.1rem;
+    }
+
+    #navigation-header-extra {
+      & > *:hover svg {
+        transform: scale(1.1);
+        transition-duration: 0.2s;
+        transform-origin: center;
+      }
+
+      #navigation-header-signout {
+        background-color: transparent;
+        margin-left: 10px;
+
+        &:hover {
+          cursor: pointer;
+        }
+      }
+
+      svg {
+        width: auto;
+        height: 30px;
+        fill: $color-black-0;
+      }
+    }
+  }
+
+  #navigation-body {
+    flex: 1 1 0;
+
+    & > * {
+      padding: 10px 20px;
+    }
+
+    & > * + * {
+      border-top: solid 2px $color-grey-4;
+    }
+
+    #navigation-links .navigation-link {
+      display: flex;
+      flex-direction: row;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 8px 0;
+      font-size: 1.2rem;
+      color: $color-black-0;
+      text-decoration: none;
+
+      &.navigation-link-active {
+        background-color: $color-grey-5;
+      }
+
+      svg {
+        width: auto;
+        height: 20px;
+        fill: $color-black-0;
+      }
+
+      .navigation-link-text {
+        flex: 1 1 0;
+        margin-left: 10px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+
+    #navigation-projects {
+      .navigation-project {
+        padding: 8px 0;
+        font-size: 1.2rem;
+        color: $color-black-0;
+        text-decoration: none;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      & > button {
+        display: block;
+        margin: 30px 0 10px 0;
+        padding: 8px 16px;
+        border-radius: 8px;
+        background-color: $color-purple-3;
+        font-size: 1rem;
+        color: $color-white-0;
+
+        &:hover {
+          cursor: pointer;
+        }
+      }
+    }
+  }
+}
